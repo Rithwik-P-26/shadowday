@@ -63,7 +63,8 @@ describe("failover order", () => {
     expect(url).toBe(GROQ_URL);
     expect(new Headers(init.headers).get("authorization")).toBe(`Bearer ${GROQ_KEY}`);
     const body = JSON.parse(String(init.body));
-    expect(body.model).toBe("llama-3.3-70b-versatile");
+    expect(body.model).toBe("openai/gpt-oss-120b");
+    expect(body.reasoning_effort).toBe("low");
     expect(body.messages[0]).toEqual({ role: "system", content: input.system });
     expect(body.messages.slice(1)).toEqual(input.messages);
     expect(body.temperature).toBe(0.5);

@@ -44,7 +44,7 @@ export class ProviderError extends Error {
 
 export const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 export const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
-export const DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile";
+export const DEFAULT_GROQ_MODEL = "openai/gpt-oss-120b";
 export const DEFAULT_GEMINI_MODEL = "gemini-flash-lite-latest";
 
 function env(name: string): string | undefined {
@@ -92,6 +92,10 @@ async function postJson(
   }
 }
 
+function isReasoningModel(model: string): boolean {
+  return /^openai\/gpt-oss/.test(model);
+}
+
 /** Groq's OpenAI-compatible chat completions endpoint. */
 export function createGroqProvider(apiKey: string, model: string = DEFAULT_GROQ_MODEL): LlmProvider {
   return async ({ system, messages, maxTokens, temperature, signal }) => {
@@ -102,9 +106,11 @@ export function createGroqProvider(apiKey: string, model: string = DEFAULT_GROQ_
       {
         model,
         messages: [{ role: "system", content: system }, ...messages.map((m) => ({ role: m.role, content: m.content }))],
-        max_completion_tokens: maxTokens,
+        // gpt-oss models reason before answering; keep that short and leave room for it in the budget.
+        max_completion_tokens: isReasoningModel(model) ? maxTokens + 1024 : maxTokens,
         temperature,
         stream: false,
+        ...(isReasoningModel(model) ? { reasoning_effort: "low", include_reasoning: false } : {}),
       },
       signal,
       apiKey,
