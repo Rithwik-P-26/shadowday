@@ -12,6 +12,6 @@ const file = new URL("../public/index.html", import.meta.url);
 let html = fs.readFileSync(file, "utf8");
 html = html
   .replace('<meta property="og:image" content="share.jpg">', `<meta property="og:image" content="${base}/share.jpg">\n<meta property="og:url" content="${base}/">`)
-  .replace(/<!-- <link rel="canonical"[^>]*-->/, `<link rel="canonical" href="${base}/">`);
+  .replace(/<!-- <link rel="canonical".*?-->/, `<link rel="canonical" href="${base}/">`);
 fs.writeFileSync(file, html);
 console.log(`stamp-site-url: share links now point at ${base}`);
