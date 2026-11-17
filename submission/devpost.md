@@ -108,3 +108,34 @@ next.js, react, typescript, tailwindcss, python, pyodide, webassembly, web-worke
 - 99% of UAE tech funding in 9M 2026 to Dubai (69%) and Abu Dhabi (30%): Tracxn, *UAE Tech 9M 2026* report, via [Zawya](https://www.zawya.com/en/press-release/companies-news/moove-cargo-x-and-tabby-raise-733mln-combined-accounting-for-49-of-uae-techs-1.5bln-in-9m-2026-1857288).
 - Childhood exposure and invention: Bell, Chetty, Jaravel, Petkova and Van Reenen, "Who Becomes an Inventor in America? The Importance of Exposure to Innovation," *Quarterly Journal of Economics* 134(2), 2019.
 - Liwa is about 160 km from Hub71 in a straight line, computed in the app (`kmToNearestHub` in `content/regions.ts`).
+
+---
+
+## YouTube upload
+
+- **File:** `demo/shadowday-demo.mp4` (2:23, 1080p). Captions are burned in; `demo/shadowday-demo.srt` can also be added as subtitles.
+- **Thumbnail:** `demo/thumbnail.jpg` (custom thumbnails need a verified YouTube account; skip it if YouTube asks for verification).
+- **Visibility:** Public or Unlisted (both work for Devpost).
+- **Title:** Shadowday: a first day at a tech job, from anywhere in the UAE (Bridge The Gap Hacks 2026)
+- **Description:**
+
+> Shadowday is a free browser simulation of a first day at a tech job for UAE secondary students. Pick your area, join a (fictional) startup working on a problem near you, ask the customer for the rule nobody wrote down, write real Python against real tests in the browser, get your pull request reviewed, demo it, and leave with a Shadow Report. English and Arabic, phone and laptop, no account, $0 to run.
+>
+> Built solo for Bridge The Gap Hacks 2026.
+> Live app: <Vercel URL>
+> Code: https://github.com/Rithwik-P-26/shadowday
+>
+> Sources: WAM (AI curriculum in UAE public schools, 2025); Tracxn UAE Tech 9M 2026 report; Bell, Chetty, Jaravel, Petkova and Van Reenen, QJE 2019.
+
+## Screenshots for the Devpost gallery
+
+Upload these from `docs/screenshots/`, in this order:
+1. `04-customer-reveals-the-rule.jpg`
+2. `03-tests-say-ask-the-customer.jpg`
+3. `05-mentor-refuses-to-give-code.jpg`
+4. `07-pull-request-review.jpg`
+5. `08-demo-for-the-manager.jpg`
+6. `09-shadow-report.jpg`
+7. `10-phone-arabic.jpg`
+8. `11-architecture.jpg`
+9. `01-pick-your-area.jpg`
