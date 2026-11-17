@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "tickets": "node scripts/build-tickets.mjs",
     "predev": "node scripts/copy-pyodide.mjs",
-    "prebuild": "node scripts/copy-pyodide.mjs && node scripts/build-tickets.mjs"
+    "prebuild": "node scripts/copy-pyodide.mjs && node scripts/build-tickets.mjs && node scripts/stamp-site-url.mjs"
   },
   "dependencies": {
     "@codemirror/lang-python": "^6.2.1",

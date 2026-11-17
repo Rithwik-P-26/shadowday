@@ -6,7 +6,12 @@ const schibsted = Schibsted_Grotesk({ variable: "--font-schibsted", subsets: ["l
 const jetbrains = JetBrains_Mono({ variable: "--font-jetbrains", subsets: ["latin"] });
 const plexArabic = IBM_Plex_Sans_Arabic({ variable: "--font-plex-arabic", subsets: ["arabic"], weight: ["400", "500"] });
 
+// Absolute URLs for the share image: SITE_URL if set, else the production domain Vercel exposes, else local dev.
+const siteUrl =
+  process.env.SITE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Shadowday: a first day at a tech job",
   description: "A free browser simulation of a first day at a tech job for UAE students. Real Python, real tests, AI coworkers, in English and Arabic.",
   openGraph: {
