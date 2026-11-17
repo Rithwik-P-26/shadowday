@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" font-family="Schibsted Grotesk, Helvetica, Arial, sans-serif">
+  <rect width="1600" height="900" fill="#000"/>
+  <text x="80" y="96" fill="#fff" font-size="44" letter-spacing="-1.5">How Shadowday works</text>
+  <text x="80" y="140" fill="#999" font-size="22">Everything a student touches runs in the browser. Only the coworkers' replies go to the server, and those work without any paid API.</text>
+
+  <!-- Browser -->
+  <rect x="80" y="190" width="820" height="640" rx="28" fill="#0d0d0d" stroke="rgba(255,255,255,0.14)"/>
+  <text x="112" y="236" fill="#93f1f7" font-size="20" font-family="JetBrains Mono, monospace">Browser · Next.js app</text>
+
+  <g font-size="20" fill="#fff">
+    <rect x="112" y="262" width="756" height="86" rx="18" fill="#161616"/>
+    <text x="136" y="300">Region pack: 14 UAE areas → 3 local problems</text>
+    <text x="136" y="330" fill="#999" font-size="17">content/regions.ts · one file per region, so any place can be added</text>
+
+    <rect x="112" y="364" width="756" height="86" rx="18" fill="#161616"/>
+    <text x="136" y="402">Day engine: standup → build → review → demo → report</text>
+    <text x="136" y="432" fill="#999" font-size="17">Zustand world state, saved on the device only. No account, no personal data.</text>
+
+    <rect x="112" y="466" width="368" height="166" rx="18" fill="#161616"/>
+    <text x="136" y="504">Code editor</text>
+    <text x="136" y="534" fill="#999" font-size="17">CodeMirror 6, phone keybar,</text>
+    <text x="136" y="560" fill="#999" font-size="17">English and Arabic (RTL)</text>
+
+    <rect x="500" y="466" width="368" height="166" rx="18" fill="#161616" stroke="#9ae187" stroke-opacity="0.5"/>
+    <text x="524" y="504">Python in a Web Worker</text>
+    <text x="524" y="534" fill="#999" font-size="17">Pyodide runs the real unit tests</text>
+    <text x="524" y="560" fill="#999" font-size="17">and the demo on field data.</text>
+    <text x="524" y="586" fill="#9ae187" font-size="17">Grading never uses an LLM.</text>
+
+    <rect x="112" y="648" width="756" height="150" rx="18" fill="#161616"/>
+    <text x="136" y="686">Tickets: starter code · tests · data · hint ladder · hidden rule</text>
+    <text x="136" y="716" fill="#999" font-size="17">Tests for the hidden-rule function fail until the student asks the customer.</text>
+    <text x="136" y="742" fill="#999" font-size="17">Checked by scripts/check-tickets.py: the reference passes, the starter and</text>
+    <text x="136" y="766" fill="#999" font-size="17">a "didn't ask" solution fail exactly where they should.</text>
+  </g>
+
+  <!-- Arrow -->
+  <path d="M900 470 H 980" stroke="#93f1f7" stroke-width="3"/>
+  <path d="M968 460 L 984 470 L 968 480" fill="none" stroke="#93f1f7" stroke-width="3"/>
+  <text x="904" y="452" fill="#93f1f7" font-size="16" font-family="JetBrains Mono, monospace">POST /api/agent</text>
+
+  <!-- Server -->
+  <rect x="990" y="190" width="530" height="640" rx="28" fill="#0d0d0d" stroke="rgba(255,255,255,0.14)"/>
+  <text x="1022" y="236" fill="#93f1f7" font-size="20" font-family="JetBrains Mono, monospace">Server · one route handler</text>
+  <g font-size="20" fill="#fff">
+    <rect x="1022" y="262" width="466" height="112" rx="18" fill="#161616"/>
+    <text x="1046" y="300">Three coworkers, one prompt each</text>
+    <text x="1046" y="330" fill="#999" font-size="17">Manager · customer · senior engineer.</text>
+    <text x="1046" y="356" fill="#999" font-size="17">Only the customer's prompt holds the rule.</text>
+
+    <rect x="1022" y="390" width="466" height="150" rx="18" fill="#161616"/>
+    <text x="1046" y="428">Free failover chain</text>
+    <rect x="1046" y="448" width="120" height="40" rx="20" fill="#93f1f7"/>
+    <text x="1106" y="474" fill="#000" font-size="17" text-anchor="middle">Groq</text>
+    <rect x="1186" y="448" width="120" height="40" rx="20" fill="#93f1f7" fill-opacity="0.7"/>
+    <text x="1246" y="474" fill="#000" font-size="17" text-anchor="middle">Gemini</text>
+    <rect x="1326" y="448" width="138" height="40" rx="20" fill="#2a2a2a"/>
+    <text x="1395" y="474" fill="#fff" font-size="17" text-anchor="middle">Scripted</text>
+    <text x="1046" y="520" fill="#999" font-size="17">Free tiers first; works with no keys at all.</text>
+
+    <rect x="1022" y="556" width="466" height="112" rx="18" fill="#161616" stroke="#ff8a80" stroke-opacity="0.5"/>
+    <text x="1046" y="594">No-solution guardrail</text>
+    <text x="1046" y="624" fill="#999" font-size="17">Code in a mentor reply → retry once,</text>
+    <text x="1046" y="650" fill="#999" font-size="17">then fall back to the written hint.</text>
+
+    <rect x="1022" y="684" width="466" height="114" rx="18" fill="#161616"/>
+    <text x="1046" y="722">Reveal detection</text>
+    <text x="1046" y="752" fill="#999" font-size="17">Marks the moment the student asked the</text>
+    <text x="1046" y="778" fill="#999" font-size="17">right question, for the Shadow Report.</text>
+  </g>
+</svg>

@@ -1,0 +1,190 @@
+{
+  "key": "FLJ-42",
+  "title": {
+    "en": "Daily pumping report for Saeed's farm",
+    "ar": "تقرير الضخ اليومي لمزرعة سعيد"
+  },
+  "body": {
+    "en": "Morning! Here's your first ticket.\nSaeed's flow meters send us a reading from each of his two wells every 6 hours (it's all in well_readings.csv). He wants a simple daily report:\n- parse_reading: turn one line of the CSV into a dict\n- daily_totals: add up the liters pumped each day, across both wells\n- flag_overpumping: flag the days when the farm is over-pumping. Saeed can tell you what that means\nHeads up: the meters glitch sometimes and send ERR. The tests are in tests.py, so run them as you go. Shout if you get stuck!",
+    "ar": "صباح الخير! هذه أول مهمة لك.\nترسل لنا عدادات سعيد قراءة من كل بئر من بئريه كل 6 ساعات (كلها في ملف well_readings.csv)، وهو يريد تقريراً يومياً بسيطاً:\n- parse_reading: حوّل سطراً واحداً من ملف CSV إلى قاموس (dict)\n- daily_totals: اجمع اللترات التي ضُخّت في كل يوم من البئرين معاً\n- flag_overpumping: حدّد الأيام التي يحدث فيها ضخ زائد في المزرعة. سعيد يستطيع أن يشرح لك ما المقصود بذلك\nانتبه: العدادات تتعطل أحياناً وترسل ERR. الاختبارات موجودة في tests.py، فشغّلها كلما تقدمت. وإذا علقت في شيء فأخبرني!"
+  },
+  "fileName": "pumps.py",
+  "dataFileName": "well_readings.csv",
+  "dataNote": {
+    "en": "This dataset is fictional. It was made up for Shadowday and does not come from a real farm.",
+    "ar": "هذه البيانات خيالية، أُعدّت خصيصاً لـ Shadowday وليست من مزرعة حقيقية."
+  },
+  "hiddenFn": "flag_overpumping",
+  "testFn": {
+    "test_parse_reading_basic": "parse_reading",
+    "test_parse_reading_strips_whitespace": "parse_reading",
+    "test_parse_reading_skips_header_and_blank_lines": "parse_reading",
+    "test_parse_reading_skips_glitches": "parse_reading",
+    "test_daily_totals_adds_both_wells": "daily_totals",
+    "test_daily_totals_several_days": "daily_totals",
+    "test_daily_totals_skips_none": "daily_totals",
+    "test_daily_totals_empty_list": "daily_totals",
+    "test_flag_overpumping_clear_spikes": "flag_overpumping",
+    "test_flag_overpumping_slow_summer_rise": "flag_overpumping",
+    "test_flag_overpumping_jump_after_quiet_week": "flag_overpumping",
+    "test_flag_overpumping_busy_second_day": "flag_overpumping"
+  },
+  "functions": [
+    {
+      "name": "parse_reading",
+      "signature": "parse_reading(line: str) -> dict | None",
+      "summary": {
+        "en": "Turn one line of the CSV into a reading, or None for a line to skip.",
+        "ar": "حوّل سطراً واحداً من ملف CSV إلى قراءة، أو None إذا كان يجب تجاهل السطر."
+      }
+    },
+    {
+      "name": "daily_totals",
+      "signature": "daily_totals(readings: list) -> dict",
+      "summary": {
+        "en": "Add up the liters pumped each day, across both wells.",
+        "ar": "اجمع اللترات التي ضُخّت في كل يوم من البئرين معاً."
+      }
+    },
+    {
+      "name": "flag_overpumping",
+      "signature": "flag_overpumping(totals: dict) -> list",
+      "summary": {
+        "en": "List the days when the farm was over-pumping, sorted by date.",
+        "ar": "اذكر الأيام التي حدث فيها ضخ زائد في المزرعة، مرتبة حسب التاريخ."
+      }
+    }
+  ],
+  "hidden": {
+    "rule": {
+      "en": "A day is over-pumping when the farm pumps more than 20% above its average for the 7 days before it. So if the last week averaged 10,000 liters a day, anything over 12,000 is too much. If there aren't 7 earlier days to compare with, don't flag that day, because I can't judge it yet.",
+      "ar": "يكون في اليوم ضخ زائد عندما تضخ المزرعة أكثر من 20% فوق متوسطها في الأيام السبعة التي قبله. يعني لو كان متوسط الأسبوع الذي قبله 10,000 لتر في اليوم، فأي شيء فوق 12,000 لتر كثير. وإذا لم تكن هناك 7 أيام قبله للمقارنة فلا تحدّده، لأنني لا أستطيع الحكم عليه بعد."
+    },
+    "revealKeywords": [
+      "over-pumping",
+      "overpumping",
+      "over pumping",
+      "pumping too much",
+      "too much water",
+      "how much is too much",
+      "what counts",
+      "what does it mean",
+      "how do you know",
+      "rule",
+      "threshold",
+      "limit",
+      "normal",
+      "average",
+      "الضخ الزائد",
+      "ضخ زائد",
+      "أكثر من اللازم",
+      "ماذا يعني",
+      "ما المقصود",
+      "كيف تعرف",
+      "متى يكون",
+      "القاعدة",
+      "الحد",
+      "المتوسط",
+      "المعدل"
+    ],
+    "revealMarkers": [
+      "20%",
+      "20 %",
+      "20 percent",
+      "20 per cent",
+      "twenty percent",
+      "twenty per cent",
+      "7 days",
+      "seven days",
+      "7 previous days",
+      "seven previous days",
+      "previous 7",
+      "previous seven",
+      "٢٠٪",
+      "٢٠ ٪",
+      "٢٠%",
+      "20٪",
+      "20 ٪",
+      "عشرين بالمئة",
+      "عشرين في المئة",
+      "عشرين بالمائة",
+      "عشرين في المائة",
+      "سبعة أيام",
+      "7 أيام",
+      "٧ أيام",
+      "الأيام السبعة"
+    ]
+  },
+  "hints": {
+    "parse_reading": [
+      {
+        "level": 1,
+        "text": {
+          "en": "Look at one line of well_readings.csv. Which three pieces do you need, and which lines have no real reading in them?",
+          "ar": "انظر إلى سطر واحد من well_readings.csv. ما القطع الثلاث التي تحتاجها، وما الأسطر التي لا تحتوي على قراءة حقيقية؟"
+        }
+      },
+      {
+        "level": 2,
+        "text": {
+          "en": "strip() cleans both ends of a string, and split(',') cuts it into a list at every comma. float() turns text like '1250' into the number 1250.0.",
+          "ar": "الدالة strip() تنظّف طرفي النص، و split(',') تقطعه إلى قائمة عند كل فاصلة. أما float() فتحوّل نصاً مثل '1250' إلى العدد 1250.0."
+        }
+      },
+      {
+        "level": 3,
+        "text": {
+          "en": "1. Strip the line.\n2. If it is empty or it is the header, give back None.\n3. Split it on commas into the timestamp, the well and the liters.\n4. If the liters part is 'ERR' or empty, give back None.\n5. The date is the part of the timestamp before the space.\n6. Build a dictionary with the date, the well and the liters as a float, and give it back.",
+          "ar": "1. أزل المسافات من طرفي السطر.\n2. إذا كان السطر فارغاً أو كان سطر العناوين، أعد None.\n3. اقسم السطر عند الفواصل إلى الوقت والبئر وعدد اللترات.\n4. إذا كان جزء اللترات 'ERR' أو فارغاً، أعد None.\n5. التاريخ هو الجزء الذي يسبق المسافة في الوقت.\n6. كوّن قاموساً فيه التاريخ والبئر وعدد اللترات كعدد عشري (float)، ثم أعده."
+        }
+      }
+    ],
+    "daily_totals": [
+      {
+        "level": 1,
+        "text": {
+          "en": "You need one total per date. What should happen the first time you see a date, and what should happen the next time you see it?",
+          "ar": "تحتاج إلى مجموع واحد لكل تاريخ. ماذا يجب أن يحدث أول مرة ترى فيها تاريخاً، وماذا يحدث في المرة التالية؟"
+        }
+      },
+      {
+        "level": 2,
+        "text": {
+          "en": "Use a dictionary to keep running totals. dict.get(date, 0) gives you the total so far, or 0 if that date isn't in the dictionary yet.",
+          "ar": "استخدم قاموساً لتحتفظ فيه بالمجاميع أثناء الحساب. الدالة dict.get(date, 0) تعطيك المجموع حتى الآن، أو 0 إذا لم يكن التاريخ في القاموس بعد."
+        }
+      },
+      {
+        "level": 3,
+        "text": {
+          "en": "1. Start with an empty dictionary.\n2. Loop over the readings.\n3. Skip a reading if it is None.\n4. Look up the total so far for that reading's date (0 if it is new) and add the reading's liters.\n5. Store the new total under that date.\n6. After the loop, give back the dictionary.",
+          "ar": "1. ابدأ بقاموس فارغ.\n2. مرّ على القراءات بحلقة تكرار.\n3. تجاوز أي قراءة قيمتها None.\n4. ابحث عن المجموع الحالي لتاريخ القراءة (0 إذا كان جديداً) وأضف إليه لترات القراءة.\n5. خزّن المجموع الجديد تحت ذلك التاريخ.\n6. بعد انتهاء الحلقة، أعد القاموس."
+        }
+      }
+    ],
+    "flag_overpumping": [
+      {
+        "level": 1,
+        "text": {
+          "en": "Do you actually know what 'over-pumping' means for Saeed's farm? What would you compare each day with, and who could tell you?",
+          "ar": "هل تعرف فعلاً ما معنى 'الضخ الزائد' في مزرعة سعيد؟ بماذا ستقارن كل يوم، ومن يستطيع أن يخبرك؟"
+        }
+      },
+      {
+        "level": 2,
+        "text": {
+          "en": "sorted() gives you the dates in order. A loop over range() gives you each position, so you can reach other days with an index or a slice. sum() and len() help you work out an average.",
+          "ar": "الدالة sorted() تعطيك التواريخ مرتبة. والحلقة على range() تعطيك موقع كل تاريخ، فتستطيع الوصول إلى أيام أخرى بالفهرس أو بالتقطيع (slice). وتساعدك sum() و len() على حساب المتوسط."
+        }
+      },
+      {
+        "level": 3,
+        "text": {
+          "en": "1. Ask Saeed exactly what counts as over-pumping, and write his rule in a comment.\n2. Put the dates in order with sorted().\n3. Loop over the dates by position, so you can look at the days around each one.\n4. For each date, work out the number Saeed compares it with.\n5. If that day breaks Saeed's rule, add the date to a list.\n6. Give back the list, earliest date first.",
+          "ar": "1. اسأل سعيد بالضبط ما الذي يُعدّ ضخاً زائداً، واكتب قاعدته في تعليق.\n2. رتّب التواريخ باستخدام sorted().\n3. مرّ على التواريخ حسب موقعها، لتتمكن من النظر إلى الأيام المحيطة بكل يوم.\n4. لكل تاريخ، احسب الرقم الذي يقارنه به سعيد.\n5. إذا خالف ذلك اليوم قاعدة سعيد، أضف التاريخ إلى قائمة.\n6. أعد القائمة، بدءاً من أقدم تاريخ."
+        }
+      }
+    ]
+  },
+  "conceptTags": ["string parsing", "dictionaries", "loops", "averages", "sorting"]
+}

@@ -48,7 +48,7 @@ export const MANAGER: Character = {
   name: { en: "Mariam", ar: "مريم" },
   role: { en: "Engineering manager", ar: "مديرة الهندسة" },
   initials: "M",
-  color: "#0f766e",
+  color: "#93f1f7",
   bio: {
     en: "Runs the morning standup, assigns tickets and reviews what shipped at the end of the day. Started as a junior engineer herself.",
     ar: "تدير اجتماع الصباح وتوزّع المهام وتراجع ما تم إنجازه في نهاية اليوم. بدأت مسيرتها مهندسة مبتدئة.",
@@ -60,7 +60,7 @@ export const MENTOR: Character = {
   name: { en: "Ravi", ar: "رافي" },
   role: { en: "Senior engineer", ar: "مهندس أول" },
   initials: "R",
-  color: "#b45309",
+  color: "#f5c26b",
   bio: {
     en: "Reviews every pull request. Answers questions with questions, and never writes your code for you.",
     ar: "يراجع كل طلب دمج. يجيب عن الأسئلة بأسئلة، ولا يكتب الكود بدلاً منك أبداً.",
@@ -87,7 +87,7 @@ export const ARCHETYPES: Record<ArchetypeId, Archetype> = {
       name: { en: "Saeed", ar: "سعيد" },
       role: { en: "Date farm owner, Falaj Labs' first customer", ar: "صاحب مزرعة نخيل، أول عميل لدى فلج لابز" },
       initials: "S",
-      color: "#4d7c0f",
+      color: "#9ae187",
       bio: {
         en: "Has farmed dates for thirty years. Knows exactly when a well is being pushed too hard, but explains it in farmer's terms, not engineer's.",
         ar: "يزرع النخيل منذ ثلاثين عاماً. يعرف تماماً متى يُرهَق البئر، لكنه يشرح ذلك بلغة المزارع لا بلغة المهندس.",
@@ -113,7 +113,7 @@ export const ARCHETYPES: Record<ArchetypeId, Archetype> = {
       name: { en: "Khalid", ar: "خالد" },
       role: { en: "Roads coordinator for the town, WadiWatch's customer", ar: "منسّق الطرق في البلدة، عميل وادي ووتش" },
       initials: "K",
-      color: "#1d4ed8",
+      color: "#8ab4ff",
       bio: {
         en: "Decides which roads close during storms. Cares about one thing: nobody drives into a flooded wadi.",
         ar: "يقرّر أي الطرق تُغلق أثناء العواصف. يهتم بأمر واحد: ألا يقود أحد سيارته إلى وادٍ غمرته المياه.",
@@ -139,7 +139,7 @@ export const ARCHETYPES: Record<ArchetypeId, Archetype> = {
       name: { en: "Fatima", ar: "فاطمة" },
       role: { en: "Site safety officer, Barid Labs' customer", ar: "مسؤولة السلامة في الموقع، عميلة باريد لابز" },
       initials: "F",
-      color: "#be123c",
+      color: "#ff9e80",
       bio: {
         en: "Responsible for two hundred workers on a construction site. Knows the safety rules by heart and will not bend them.",
         ar: "مسؤولة عن مئتي عامل في موقع بناء. تحفظ قواعد السلامة عن ظهر قلب ولا تتهاون فيها.",

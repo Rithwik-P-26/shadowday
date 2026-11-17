@@ -1,0 +1,180 @@
+{
+  "key": "WDW-17",
+  "title": {
+    "en": "Road closure alerts from the rain gauges",
+    "ar": "تنبيهات إغلاق الطرق من مقاييس الأمطار"
+  },
+  "body": {
+    "en": "Hi, welcome to WadiWatch! Your first ticket is a real one.\nOur gauges above three wadi roads send a rain reading every 15 minutes (see rain_gauges.csv). Khalid needs to know which roads to close:\n- parse_reading: turn one line of the CSV into a dict\n- hourly_totals: add up the rain at each gauge, hour by hour\n- roads_to_close: decide which roads to close. Heavy rain, roughly 20 mm in an hour, is the danger, but Khalid has the exact rules, so check with him\nThe gauges glitch sometimes and send ERR. The tests are in tests.py, so run them often!",
+    "ar": "أهلاً بك في وادي ووتش! أول مهمة لك مهمة حقيقية.\nترسل مقاييسنا فوق ثلاثة طرق أودية قراءة للمطر كل 15 دقيقة (انظر ملف rain_gauges.csv). ويحتاج خالد إلى معرفة الطرق التي يجب إغلاقها:\n- parse_reading: حوّل سطراً واحداً من ملف CSV إلى قاموس (dict)\n- hourly_totals: اجمع المطر عند كل مقياس، ساعة بساعة\n- roads_to_close: قرّر أي الطرق يجب إغلاقها. الخطر هو المطر الغزير، نحو 20 ملم في الساعة، لكن القواعد الدقيقة عند خالد، فتأكد منه\nالمقاييس تتعطل أحياناً وترسل ERR. الاختبارات موجودة في tests.py، فشغّلها كثيراً!"
+  },
+  "fileName": "gauges.py",
+  "dataFileName": "rain_gauges.csv",
+  "dataNote": {
+    "en": "This dataset is fictional. It was made up for Shadowday and does not come from real rain gauges.",
+    "ar": "هذه البيانات خيالية، أُعدّت خصيصاً لـ Shadowday وليست من مقاييس أمطار حقيقية."
+  },
+  "hiddenFn": "roads_to_close",
+  "testFn": {
+    "test_parse_reading_basic": "parse_reading",
+    "test_parse_reading_strips_whitespace": "parse_reading",
+    "test_parse_reading_skips_header_and_blank_lines": "parse_reading",
+    "test_parse_reading_skips_glitches": "parse_reading",
+    "test_hourly_totals_adds_up_one_hour": "hourly_totals",
+    "test_hourly_totals_keeps_gauges_and_hours_apart": "hourly_totals",
+    "test_hourly_totals_skips_none": "hourly_totals",
+    "test_roads_to_close_one_downpour": "roads_to_close",
+    "test_roads_to_close_names_are_sorted": "roads_to_close",
+    "test_roads_to_close_light_rain_stays_open": "roads_to_close",
+    "test_roads_to_close_saham_at_noon": "roads_to_close",
+    "test_roads_to_close_wurayah_in_the_afternoon": "roads_to_close"
+  },
+  "functions": [
+    {
+      "name": "parse_reading",
+      "signature": "parse_reading(line: str) -> dict | None",
+      "summary": {
+        "en": "Turn one line of the CSV into a reading, or None for a line to skip.",
+        "ar": "حوّل سطراً واحداً من ملف CSV إلى قراءة، أو None إذا كان يجب تجاهل السطر."
+      }
+    },
+    {
+      "name": "hourly_totals",
+      "signature": "hourly_totals(readings: list) -> dict",
+      "summary": {
+        "en": "Add up the rain at each gauge, hour by hour.",
+        "ar": "اجمع كمية المطر عند كل مقياس، ساعة بساعة."
+      }
+    },
+    {
+      "name": "roads_to_close",
+      "signature": "roads_to_close(hourly: dict, roads: list) -> list",
+      "summary": {
+        "en": "Decide which wadi roads to close, sorted by name.",
+        "ar": "قرّر أي طرق الأودية يجب إغلاقها، مرتبة حسب الاسم."
+      }
+    }
+  ],
+  "hidden": {
+    "rule": {
+      "en": "I close a road if any single hour at its gauge gets 20 mm of rain or more. I also close it if the hourly rain climbs three hours in a row, each hour wetter than the one before, like 2, then 5, then 9 mm, even if it never reaches 20, because that means the storm is building over the mountains. Otherwise the road stays open.",
+      "ar": "أغلق الطريق إذا سجّل مقياسه 20 ملم من المطر أو أكثر في أي ساعة واحدة. وأغلقه أيضاً إذا ارتفع المطر على مدى ثلاث ساعات متتالية، كل ساعة أغزر من التي قبلها، مثل 2 ثم 5 ثم 9 ملم، حتى لو لم يصل إلى 20 أبداً، لأن ذلك يعني أن العاصفة تشتد فوق الجبال. وفي غير ذلك يبقى الطريق مفتوحاً."
+    },
+    "revealKeywords": [
+      "close",
+      "closing",
+      "closure",
+      "rule",
+      "when do you",
+      "when should",
+      "how much rain",
+      "dangerous",
+      "threshold",
+      "limit",
+      "exactly",
+      "20 mm",
+      "إغلاق",
+      "تغلق",
+      "يُغلق",
+      "نغلق",
+      "القاعدة",
+      "القواعد",
+      "متى",
+      "كمية المطر",
+      "خطر",
+      "الحد"
+    ],
+    "revealMarkers": [
+      "three hours",
+      "3 hours",
+      "in a row",
+      "three straight hours",
+      "3 straight hours",
+      "20 mm or more",
+      "20mm or more",
+      "20 mm of rain or more",
+      "at least 20",
+      "ثلاث ساعات",
+      "3 ساعات",
+      "٣ ساعات",
+      "متتالية",
+      "على التوالي",
+      "20 ملم أو أكثر",
+      "٢٠ ملم أو أكثر",
+      "20 ملم من المطر أو أكثر",
+      "عشرين ملم أو أكثر"
+    ]
+  },
+  "hints": {
+    "parse_reading": [
+      {
+        "level": 1,
+        "text": {
+          "en": "Look at '2026-04-14 13:15,G-HAM,2.4'. Which part of the time tells you the hour, and which lines have no rain reading at all?",
+          "ar": "انظر إلى '2026-04-14 13:15,G-HAM,2.4'. أي جزء من الوقت يدلّك على الساعة، وما الأسطر التي لا تحتوي على قراءة مطر أصلاً؟"
+        }
+      },
+      {
+        "level": 2,
+        "text": {
+          "en": "strip() and split(',') break the line into pieces. String slicing keeps just part of a string: the first 13 characters of the time are the date and the hour. float() turns '2.4' into 2.4.",
+          "ar": "الدالتان strip() و split(',') تقسمان السطر إلى أجزاء. وتقطيع النصوص (slicing) يحتفظ بجزء من النص فقط: أول 13 حرفاً من الوقت هي التاريخ والساعة. أما float() فتحوّل '2.4' إلى 2.4."
+        }
+      },
+      {
+        "level": 3,
+        "text": {
+          "en": "1. Strip the line.\n2. Give back None for a blank line or the header.\n3. Split it on commas into the time, the gauge and the mm.\n4. Give back None if the mm part is 'ERR'.\n5. Keep the first 13 characters of the time: that's the date and the hour.\n6. Build a dictionary with the hour, the gauge and the mm as a float, and give it back.",
+          "ar": "1. أزل المسافات من طرفي السطر.\n2. أعد None إذا كان السطر فارغاً أو كان سطر العناوين.\n3. اقسم السطر عند الفواصل إلى الوقت والمقياس وكمية المطر.\n4. أعد None إذا كان جزء كمية المطر 'ERR'.\n5. احتفظ بأول 13 حرفاً من الوقت: هذه هي التاريخ والساعة.\n6. كوّن قاموساً فيه الساعة والمقياس وكمية المطر كعدد عشري (float)، ثم أعده."
+        }
+      }
+    ],
+    "hourly_totals": [
+      {
+        "level": 1,
+        "text": {
+          "en": "The answer is a dictionary inside a dictionary. What is the outer key, and what is the inner key?",
+          "ar": "الناتج قاموس داخل قاموس. ما المفتاح الخارجي، وما المفتاح الداخلي؟"
+        }
+      },
+      {
+        "level": 2,
+        "text": {
+          "en": "Nested dictionaries. The in operator tells you whether a gauge already has its own dictionary, and dict.get(hour, 0) gives you the total so far for an hour.",
+          "ar": "القواميس المتداخلة. العامل in يخبرك إن كان للمقياس قاموس خاص به بالفعل، والدالة dict.get(hour, 0) تعطيك المجموع حتى الآن لساعة معيّنة."
+        }
+      },
+      {
+        "level": 3,
+        "text": {
+          "en": "1. Start with an empty dictionary.\n2. Loop over the readings and skip any that are None.\n3. If the reading's gauge isn't in the dictionary yet, give it an empty dictionary of its own.\n4. In that gauge's dictionary, add the reading's mm to the total for its hour (starting from 0).\n5. After the loop, give back the outer dictionary.",
+          "ar": "1. ابدأ بقاموس فارغ.\n2. مرّ على القراءات وتجاوز أي قراءة قيمتها None.\n3. إذا لم يكن مقياس القراءة في القاموس بعد، فأعطه قاموساً فارغاً خاصاً به.\n4. في قاموس ذلك المقياس، أضف كمية المطر إلى مجموع ساعتها (ابدأ من 0).\n5. بعد انتهاء الحلقة، أعد القاموس الخارجي."
+        }
+      }
+    ],
+    "roads_to_close": [
+      {
+        "level": 1,
+        "text": {
+          "en": "For each road, which gauge's numbers do you need? And are you sure one heavy hour is the only reason Khalid would close a road? Who could tell you?",
+          "ar": "لكل طريق، أرقام أي مقياس تحتاج؟ وهل أنت متأكد أن ساعة واحدة من المطر الغزير هي السبب الوحيد الذي يجعل خالد يغلق الطريق؟ من يستطيع أن يخبرك؟"
+        }
+      },
+      {
+        "level": 2,
+        "text": {
+          "en": "Loop over the roads list. Each road has a 'gauge' key that you can look up in hourly with dict.get(). sorted() lists that gauge's hours in time order, and max() finds the biggest number in a list. Collect the road names in a list and sort it at the end.",
+          "ar": "مرّ على قائمة الطرق. لكل طريق مفتاح 'gauge' تستطيع البحث عنه في hourly باستخدام dict.get(). الدالة sorted() ترتّب ساعات ذلك المقياس حسب الوقت، و max() تجد أكبر رقم في القائمة. اجمع أسماء الطرق في قائمة ورتّبها في النهاية."
+        }
+      },
+      {
+        "level": 3,
+        "text": {
+          "en": "1. Ask Khalid exactly when a road must close, and write each of his conditions in a comment.\n2. Loop over the roads.\n3. Find the road's gauge, then list its hourly totals in time order.\n4. Check each of Khalid's conditions against those numbers.\n5. If any condition is true, add the road's name to your list.\n6. Give back the list sorted alphabetically.",
+          "ar": "1. اسأل خالد بالضبط متى يجب إغلاق الطريق، واكتب كل شرط من شروطه في تعليق.\n2. مرّ على الطرق بحلقة تكرار.\n3. جد مقياس الطريق، ثم رتّب مجاميعه لكل ساعة حسب الوقت.\n4. افحص كل شرط من شروط خالد على هذه الأرقام.\n5. إذا تحقق أي شرط، أضف اسم الطريق إلى قائمتك.\n6. أعد القائمة مرتبة أبجدياً."
+        }
+      }
+    ]
+  },
+  "conceptTags": ["string slicing", "nested dictionaries", "comparisons", "sorting"]
+}
