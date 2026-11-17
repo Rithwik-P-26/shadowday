@@ -1,0 +1,11 @@
+{
+ "page": "public/index.html",
+ "url": null,
+ "root": "public",
+ "kind": "software",
+ "category": "first-day job simulation for UAE students",
+ "primary": "Start your first day",
+ "rounds": 3,
+ "start": "2026-11-17T06:36:17.923Z",
+ "by": "gate.mjs --start"
+}

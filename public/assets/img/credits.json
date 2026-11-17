@@ -1,0 +1,61 @@
+{
+ "note": "Credits for the photographs in this folder: photos.mjs credits prints the footer block for the ones the pages use.",
+ "photos": [
+  {
+   "file": "photo-f167107634-960.jpg",
+   "files": [
+    "photo-f167107634-500.jpg",
+    "photo-f167107634-960.jpg"
+   ],
+   "id": "f167107634",
+   "alt": "Liwa Oasis palm trees with the desert view",
+   "by": "Josephyousry",
+   "licence": "CC BY-SA 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+   "page": "https://commons.wikimedia.org/wiki/File:Liwa_Oasis_palm_trees_with_the_desert_view.jpg",
+   "source": "Wikimedia Commons"
+  },
+  {
+   "file": "photo-f8672263-500.jpg",
+   "files": [
+    "photo-f8672263-500.jpg"
+   ],
+   "id": "f8672263",
+   "alt": "Falaj at al ain",
+   "by": "Bob McCaffrey",
+   "licence": "CC BY-SA 2.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+   "page": "https://commons.wikimedia.org/wiki/File:Falaj_at_al_ain.jpg",
+   "source": "Wikimedia Commons"
+  },
+  {
+   "file": "photo-f167591890-960.jpg",
+   "files": [
+    "photo-f167591890-500.jpg",
+    "photo-f167591890-960.jpg"
+   ],
+   "id": "f167591890",
+   "alt": "Al Hajar Mountains near Kalba dam",
+   "by": "AmethystDreams",
+   "licence": "CC BY-SA 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+   "page": "https://commons.wikimedia.org/wiki/File:Al_Hajar_Mountains_near_Kalba_dam.jpg",
+   "source": "Wikimedia Commons"
+  },
+  {
+   "file": "photo-f68035539.jpg",
+   "files": [
+    "photo-f68035539-500.jpg",
+    "photo-f68035539-960.jpg",
+    "photo-f68035539.jpg"
+   ],
+   "id": "f68035539",
+   "alt": "Continuous Construction",
+   "by": "Clémence Jacqueri",
+   "licence": "CC BY-SA 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+   "page": "https://commons.wikimedia.org/wiki/File:Continuous_Construction.jpg",
+   "source": "Wikimedia Commons"
+  }
+ ]
+}

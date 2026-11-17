@@ -1,0 +1,13 @@
+[
+  { "id": "01-hook", "text": "Since the 2025 school year, every public school in the UAE teaches artificial intelligence, from kindergarten to grade twelve. But the places where students can actually see tech work are not spread out. About ninety-eight percent of UAE tech funding in the first nine months of 2025 went to companies based in Dubai. And research on inventors shows that children who grow up around innovators are far more likely to become one." },
+  { "id": "02-intro", "text": "Shadowday gives every student that exposure. It is a free first day at a tech job, in the browser, from anywhere in the UAE." },
+  { "id": "03-start", "text": "Hessa lives in Liwa, more than a hundred and sixty kilometres from the nearest startup hub. She picks her area, and joins Falaj Labs, a startup that helps date farms pump less groundwater." },
+  { "id": "04-standup", "text": "Her manager, Mariam, runs the morning standup, introduces the team, and hands her a real ticket." },
+  { "id": "05-work", "text": "The ticket is three Python functions, with real unit tests that run right in her browser. Two are clear. The third says to flag the days the farm is over-pumping, but never says what that means. The tests fail, and tell her to ask. So she asks Saeed, the farmer, and he explains the rule nobody wrote down. When she asks Ravi, the senior engineer, to just give her the answer, he won't. He asks her a question instead. A few runs later, every test passes." },
+  { "id": "06-review", "text": "She opens a pull request. Ravi reviews her actual changes, suggests an improvement, and approves it." },
+  { "id": "07-demo", "text": "Then she runs her code on the farm's readings, and shows Mariam the days the wells were pushed too hard." },
+  { "id": "08-report", "text": "At the end of the day she gets a Shadow Report: what she shipped, what she did that engineers do, and a project she can download and keep." },
+  { "id": "09-mobile", "text": "It works on a phone, and in Arabic. Ahmed in Dibba joins a different startup, with a different problem: deciding which wadi roads to close when flash floods come." },
+  { "id": "10-arch", "text": "Under the hood, Python runs in the browser, so grading is done by real tests, not by an AI's opinion. The coworkers run on free AI tiers with a scripted fallback, so it costs nothing and keeps working. And a guardrail stops the mentor from ever handing over the code." },
+  { "id": "11-close", "text": "Talent is everywhere in the UAE. Now the first day can be too. This is Shadowday." }
+]

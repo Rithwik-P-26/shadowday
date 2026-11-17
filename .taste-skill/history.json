@@ -1,0 +1,25 @@
+{
+ "palettes": [
+  "candy-on-black"
+ ],
+ "types": [
+  "schibsted"
+ ],
+ "dealt": [
+  "schibsted",
+  "host",
+  "outfit"
+ ],
+ "moments": [
+  {
+   "id": "iris-opens",
+   "at": "2026-11-17T06:37:12.184Z",
+   "seed": "cbfe6bcf"
+  },
+  {
+   "id": "liquid-type",
+   "at": "2026-11-17T06:37:12.184Z",
+   "seed": "cbfe6bcf"
+  }
+ ]
+}

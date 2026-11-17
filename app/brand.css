@@ -1,0 +1,28 @@
+@import url("https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..700&family=JetBrains+Mono:wght@400..500&display=swap");
+
+:root {
+  --p-bg: #000000; --p-surface: #0d0d0d; --p-ink: #ffffff; --p-muted: #999999;
+  --p-accent: #93f1f7; --p-accent-ink: #000000; --p-action: #93f1f7; --p-action-ink: #000000;
+  --p-inv-bg: #9ae187; --p-inv-surface: #8bcc7a; --p-inv-ink: #000000; --p-inv-muted: #24391e;
+  --p-inv-accent: #000000; --p-inv-accent-ink: #9ae187; --p-inv-action: #000000; --p-inv-action-ink: #9ae187;
+  --font-display: "Schibsted Grotesk", system-ui, sans-serif;
+  --font-text: "Schibsted Grotesk", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --display-weight: 400;
+  --display-tracking: -0.035em;
+  --display-tracking-xl: -0.042em;
+  --ly-scale: 0.98;
+}
+
+/*
+  Shadowday brand tokens, dealt by tasteskill 2.5.1 (start.mjs css --page software).
+  Palette:  candy-on-black ("Candy on black": near-black ground #000000, surface #0d0d0d,
+            white ink, muted #999999, teal accent/action #93f1f7 with black label;
+            inverse band: green #9ae187 with black ink)
+  Pairing:  schibsted = Schibsted Grotesk (display and text, variable wght 400-700)
+            + JetBrains Mono (code, 400-500)
+  Radius:   round (--r-sm 10px, --r-md 16px, --r-lg 24px, --r-btn 999px); buttons "solid" (44px, label 16px/500); lit ground "sky"; mark: wordmark (the name alone)
+  Font families: "Schibsted Grotesk", "JetBrains Mono"
+  Weights:  headlines 400 (--display-weight), text 400, labels and buttons 500, never 700/800.
+  Tracking: --display-tracking -0.035em on headings 40px+, --display-tracking-xl -0.042em at hero size.
+*/

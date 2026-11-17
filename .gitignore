@@ -51,3 +51,6 @@ playwright-report/
 # Pyodide runtime is copied from node_modules at dev/build time
 public/pyodide/
 !.env.example
+__pycache__/
+.taste-skill/*
+!.taste-skill/*.json

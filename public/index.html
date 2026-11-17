@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="en" data-type="software" data-radius="round" data-ground="sky" data-buttons="solid" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shadowday: a tech job simulator for UAE secondary students</title>
+<meta name="description" content="Spend a first day at Falaj Labs, WadiWatch or Barid Labs, startups on real problems near you: a standup with Mariam, Python with real tests and a code review by Ravi. Free, in English and Arabic.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Shadowday: a tech job simulator for UAE secondary students">
+<meta property="og:description" content="Spend a first day at Falaj Labs, WadiWatch or Barid Labs: a standup with Mariam, Python with real tests and a code review by Ravi.">
+<meta property="og:image" content="share.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#000000">
+<!-- <link rel="canonical" href="https://[the client's domain]/"> : the domain is still to come -->
+<meta name="site-kind" content="software">
+<meta name="page-type" content="software">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..700&family=JetBrains+Mono:wght@400..500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/system.css">
+<link rel="stylesheet" href="assets/ui/cards.css">
+<link rel="stylesheet" href="assets/motion/motion.css">
+<link rel="stylesheet" href="assets/backgrounds/backgrounds.css">
+<link rel="stylesheet" href="assets/layout/layout.css">
+<link rel="stylesheet" href="assets/icons/icon.css">
+<!-- <html lang="en" data-radius="round">; keep this <style> after the links: layout.css resets --ly-scale -->
+<style>
+:root {
+  --p-bg: #000000; --p-surface: #0d0d0d; --p-ink: #ffffff; --p-muted: #999999;
+  --p-accent: #93f1f7; --p-accent-ink: #000000; --p-action: #93f1f7; --p-action-ink: #000000;
+  --p-inv-bg: #9ae187; --p-inv-surface: #8bcc7a; --p-inv-ink: #000000; --p-inv-muted: #24391e;
+  --p-inv-accent: #000000; --p-inv-accent-ink: #9ae187; --p-inv-action: #000000; --p-inv-action-ink: #9ae187;
+  --font-display: "Schibsted Grotesk", system-ui, sans-serif;
+  --font-text: "Schibsted Grotesk", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --display-weight: 400;
+  --display-tracking: -0.035em;
+  --display-tracking-xl: -0.042em;
+  --ly-scale: 0.98;
+}
+</style>
+<link rel="stylesheet" href="assets/ui/base.css">
+<link rel="stylesheet" href="assets/ui/window/fragment.css">
+<link rel="stylesheet" href="assets/ui/diff-review/fragment.css">
+<link rel="stylesheet" href="assets/ui/checklist/fragment.css">
+<link rel="stylesheet" href="assets/ui/terminal-run/fragment.css">
+<link rel="stylesheet" href="assets/ui/stat/fragment.css">
+<link rel="stylesheet" href="assets/ui/files/fragment.css">
+<script>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
+<script src="assets/backgrounds/backgrounds.js"></script>
+<script>document.documentElement.classList.add('mo-js');setTimeout(()=>document.documentElement.classList.add('mo-safe'),2500)</script>
+<link rel="modulepreload" href="assets/moments/moments.js">
+<link rel="modulepreload" href="assets/moments/lib.js">
+<link rel="modulepreload" href="assets/moments/liquid-type/moment.js">
+<link rel="modulepreload" href="assets/moments/iris-opens/moment.js">
+<!-- page CSS: only what sits inside a visual and the kit lacks, and one --p-h per card group -->
+<style>
+  /* the hero's workday window (Shadowday's own screen): a dark editor on the lit sky ground */
+  .hero__art > .ly-piece { --fx-bg: #17181b; --fx-surface: #101113; --fx-ink: #f1f3f4; --fx-muted: #a3a9ae; --fx-accent: #93f1f7; --fx-accent-ink: #000; --ui-font: var(--font-text); --ui-mono: var(--font-mono); --ui-radius: 12px; }
+  .sd-win { display: flex; flex-direction: column; background: var(--u-bg); border-radius: var(--u-r); box-shadow: 0 0 0 1px var(--u-border), var(--u-shadow); overflow: hidden; }
+  /* the window runs out through the frame's foot: it ends on that edge and dissolves into it, so no line is sliced */
+  .hero__art > .ly-piece--main { bottom: 0; border-end-start-radius: 0; border-end-end-radius: 0; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 72px), transparent calc(100% - 4px)); mask-image: linear-gradient(to bottom, #000 calc(100% - 72px), transparent calc(100% - 4px)); }
+  .hero__art { --ink: var(--ground-ink); --bg: var(--ground-surface); }
+  .sd-bar { display: flex; align-items: center; gap: 12px; height: 40px; padding: 0 var(--ly-cut-room) 0 14px; border-bottom: 1px solid var(--u-line); color: var(--u-muted); }
+  .sd-crumb i { font-style: normal; opacity: .5; padding: 0 2px; } .sd-crumb b { color: var(--u-ink); font-weight: 500; }
+  .sd-ticket { display: flex; align-items: center; gap: 10px; padding: 12px var(--ly-cut-room) 12px 14px; border-bottom: 1px solid var(--u-line); min-width: 0; }
+  .sd-key { flex: none; font: 500 12px/20px var(--ui-mono); color: var(--u-muted); padding: 0 6px; border-radius: 6px; box-shadow: inset 0 0 0 1px var(--u-line-2); }
+  .sd-title { flex: 1 1 auto; min-width: 0; font-weight: 500; font-size: 14px; color: var(--u-ink); }
+  .sd-body { display: grid; grid-template-columns: minmax(0, 1fr) 216px; padding-right: var(--ly-cut-room); flex: 1 1 auto; min-height: 0; }
+  .sd-code { min-width: 0; border-right: 1px solid var(--u-line); }
+  .sd-tabs { display: flex; height: 34px; border-bottom: 1px solid var(--u-line); }
+  .sd-tab { display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; font: 400 12px/1 var(--ui-mono); color: var(--u-muted); border-right: 1px solid var(--u-line); }
+  .sd-tab.is-on { color: var(--u-ink); background: var(--u-fill); box-shadow: inset 0 -2px 0 var(--u-ink); }
+  .sd-tab img { width: 14px; height: 14px; }
+  .sd-outline { display: flex; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--u-line); font: 400 12px/20px var(--ui-mono); color: var(--u-muted); }
+  .sd-outline span { padding: 0 6px; border-radius: 6px; white-space: nowrap; }
+  .sd-outline .is-on { color: var(--u-ink); background: var(--u-fill-2); }
+  .sd-lines { display: grid; padding: 10px 0; font: 400 12.5px/20px var(--ui-mono); white-space: pre; }
+  .sd-ln { display: grid; grid-template-columns: 32px minmax(0, 1fr); overflow: hidden; }
+  .sd-ln > i { font-style: normal; text-align: right; padding-right: 10px; color: var(--u-soft); }
+  .sd-ln.is-now { background: var(--u-fill-2); }
+  .sd-lines .k { color: var(--u-ink); font-weight: 500; } .sd-lines .f { color: color-mix(in oklab, var(--u-ink) 88%, var(--u-bg)); }
+  .sd-lines .n, .sd-lines .s { color: var(--u-muted); } .sd-lines .c { color: var(--u-muted); font-style: italic; }
+  .sd-caret { display: inline-block; width: 2px; height: 15px; vertical-align: -3px; background: var(--u-accent); }
+  .sd-chat { display: grid; align-content: start; gap: 10px; padding: 12px; min-width: 0; }
+  .sd-chat__head { display: flex; align-items: center; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--u-line); color: var(--u-muted); }
+  .sd-chat__head b { color: var(--u-ink); font-weight: 500; }
+  .sd-msg { display: grid; gap: 4px; }
+  .sd-msg__by { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--u-muted); }
+  .sd-msg__by b { color: var(--u-ink); font-weight: 500; font-size: 13px; }
+  .sd-msg__text, .sd-test small, .sd-title, .sd-bar, .sd-chat__head, #review .ui-diff__msg { font-feature-settings: normal; }
+  .sd-msg__text { padding: 8px 10px; border-radius: 10px; background: var(--u-fill-2); color: var(--u-ink); }
+  .sd-msg--me { justify-items: end; } .sd-msg--me .sd-msg__text { background: var(--u-fill-3); }
+  .sd-ar { --fx-bg: #17181b; --fx-surface: #101113; --fx-ink: #f1f3f4; --fx-muted: #a3a9ae; --fx-accent: #93f1f7; --fx-accent-ink: #000; --ui-font: var(--font-text); --ui-radius: 16px;
+    max-width: 420px; margin-top: var(--head-gap); background: var(--u-bg); border-radius: var(--u-r); box-shadow: 0 0 0 1px var(--u-border), var(--u-shadow); font-size: 14px; line-height: 22px; }
+  .sd-ar .sd-chat { padding: 16px; gap: 12px; }
+  .sd-ar .sd-msg__text { font-feature-settings: normal; }
+  .sd-tests { background: var(--u-bg); border-radius: var(--u-r); box-shadow: 0 0 0 1px var(--u-line-2), var(--u-shadow); padding: 12px 14px; }
+  .sd-tests__head { display: flex; align-items: center; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--u-line); }
+  .sd-tests__head b { font-weight: 500; }
+  .sd-tests__head code, .sd-test code { font: 400 12px/20px var(--ui-mono); color: var(--u-muted); }
+  .sd-test { display: grid; grid-template-columns: 16px minmax(0, 1fr); align-items: center; column-gap: 8px; padding-top: 8px; }
+  .sd-test code { color: var(--u-ink); }
+  .sd-test svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .sd-test.is-fail svg { color: #ff8a80; }
+  .sd-test small { grid-column: 2; font-size: 12px; line-height: 18px; color: var(--u-muted); }
+  .hero__art > .ly-piece--note { left: var(--s-6); bottom: var(--s-6); width: 300px; z-index: 2; }
+  .hero__proof { font-size: var(--t-small); color: var(--muted); }
+  @media (min-width: 1024px) and (max-width: 1279px) { .sd-body { grid-template-columns: minmax(0, 1fr); } .sd-win .sd-chat { display: none; } .sd-code { border-right: 0; } }
+  @media (max-width: 1023px) { .sd-win .sd-msg--ravi { display: none; } }
+  @media (max-width: 1023px) { .hero__art > .ly-piece--note { left: var(--s-4); bottom: var(--s-4); width: 270px; } }
+  @media (max-width: 639px) { .sd-body { grid-template-columns: minmax(0, 1fr); } .sd-win .sd-chat, .sd-outline, .sd-tabs .sd-tab:not(.is-on), .sd-bar .sd-day { display: none; } .sd-code { border-right: 0; } }
+
+  /* the dealt CSS grounds keep the system's section box (layout-v4.md section 2; backgrounds.md: a ground never changes a section's height) */
+  main > section.section:is(.bg-halo, .bg-band):not(.hero) { padding: var(--padt) 0 calc(var(--padb) + var(--bar)); display: block; align-content: normal; min-height: 0; }
+  @media (min-width: 640px) and (max-width: 1279px) { main > section.section:is(.bg-halo, .bg-band):not(.hero) { display: flex; min-height: calc(var(--h, 1) * 100svh); } }
+  @media (max-width: 639px) { main > section.section:is(.bg-halo, .bg-band):not(.hero) { display: grid; min-height: calc(var(--hm, var(--h, 1)) * 100lvh); } }
+
+  /* the day: the 2x2's panels; from 640 to 719 (one card a row) each card sets its words beside its panel, so both screens hold two cards */
+  #day .panel { --p-h: 336px; }
+  @media (min-width: 1024px) and (max-width: 1279px) { #day .panel { --p-h: 272px; } }
+  @media (min-width: 640px) and (max-width: 719px) {
+    #day .card { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-auto-rows: min-content; column-gap: var(--s-6); align-content: start; }
+    #day .card > :not(.panel) { grid-column: 1; }
+    #day .card > .panel { grid-column: 2; grid-row: 1 / span 3; --p-h: 236px; margin: calc(-1 * var(--c-pad) - 1px) calc(-1 * var(--c-pad) - 1px) calc(-1 * var(--c-pad) - 1px) 0; border-radius: 0 var(--c-r) var(--c-r) 0; }
+  }
+  @media (min-width: 720px) and (max-width: 1023px) and (min-height: 1100px) {
+    #day { --h: 1; }
+    #day > .wrap { display: flex; flex-direction: column; row-gap: var(--card-gap); }
+    #day .panel { --p-h: 236px; }
+  }
+  @media (max-width: 639px) { #day .panel { --p-h: 140px; } #day > .wrap > .grid:last-child .panel { --p-h: 200px; } #day .stage { --fade-h: 40px; } }
+
+  /* the statement runs on two lines across the .wrap; the areas by emirate under it */
+  @media (min-width: 1024px) { #anywhere .mo-lt__type { max-width: none; } }
+  .areas { display: grid; margin: 0; }
+  .areas > div { display: grid; grid-template-columns: minmax(0, 9.5rem) minmax(0, 1fr); gap: var(--s-4); padding: var(--s-3) 0; border-bottom: 1px solid var(--line); }
+  .areas > div:first-child { padding-top: 0; }
+  .areas dt { font-size: var(--t-body); font-weight: 500; }
+  .areas dd { margin: 0; font-size: var(--t-body); line-height: 1.5; }
+  @media (min-width: 640px) and (max-width: 1023px) { .areas { margin-top: var(--s-6); } }
+  @media (max-width: 639px) { .areas { margin-top: var(--s-5); } .areas > div { padding: var(--s-2) 0; grid-template-columns: minmax(0, 7.5rem) minmax(0, 1fr); } }
+
+  /* the startups: three across from 640 (the tablet keeps them on one screen) */
+  @media (min-width: 640px) and (max-width: 1023px) { #startups .grid > .tile { grid-column: auto / span 4; --tile-ratio: 4 / 5; } }
+  /* the questions under their heading when the split stacks */
+  @media (max-width: 639px) { #questions .faq { margin-top: var(--head-gap); } .sd-ar { margin-top: var(--s-5); } }
+  /* from 640 to 1023 the questions keep beside the heading and its Arabic screen, so the section stays one screen */
+  @media (min-width: 640px) and (max-width: 1023px) { #questions .grid > .span-5 { grid-column: 1 / span 5; } #questions .faq { grid-column: 6 / -1; } }
+  @media (max-width: 639px) {
+    #startups .grid > .tile { grid-column: 1 / -1; grid-template-columns: 128px minmax(0, 1fr); column-gap: var(--s-4); row-gap: var(--s-2); }
+    #startups .tile > .tile__media { grid-row: 1 / span 3; --tile-ratio: 1 / 1; align-self: start; }
+    #startups .tile > :not(.tile__media) { grid-column: 2; }
+  }
+  /* the reasons' photograph: a wider crop on the tablet, where it stacks under the words */
+  #schools .frame { --ratio: 50%; }
+  @media (min-width: 640px) and (max-width: 1023px) { #schools .frame { --ratio: 50%; } }
+  @media (min-width: 1024px) { #schools .frame { --ratio: 112%; } }
+
+  /* the app frame (sections-library.md, app-frame: the whole recipe) */
+  .app.ui { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); margin-top: var(--s-7); background: var(--u-bg); border: 1px solid var(--u-border); border-radius: var(--u-r); box-shadow: var(--u-shadow); }
+  .app > .app__pane { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
+  .app > .app__pane + .app__pane { border-left: 1px solid var(--u-line); }
+  .app > .app__pane > .ui-panel { width: 100%; border: 0; border-radius: 0; box-shadow: none; }
+  .app > .app__pane { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 64px), transparent calc(100% - 4px)); mask-image: linear-gradient(to bottom, #000 calc(100% - 64px), transparent calc(100% - 4px)); }
+  @media (min-width: 1024px) and (max-width: 1279px) { .app.ui { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); } }
+  @media (max-width: 1023px) {
+    .app.ui { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+    .app > .app__pane--list { max-height: 252px; }
+    .app > .app__pane--list { -webkit-mask-image: none; mask-image: none; }
+    .app .ui-win__side { display: none; }
+    .app .ui-win__body { grid-template-columns: minmax(0, 1fr); }
+    .app > .app__pane + .app__pane { border-left: 0; border-top: 1px solid var(--u-line); }
+  }
+  @media (max-width: 639px) {
+    .app.ui { grid-template-rows: minmax(0, 1fr); }
+    .app > .app__pane--list { display: none; }
+    .app > .app__pane + .app__pane { border-top: 0; }
+  }
+  #review .app { --fx-bg: #17181b; --fx-surface: #101113; --fx-ink: #f1f3f4; --fx-muted: #a3a9ae; --fx-accent: #93f1f7; --fx-accent-ink: #000; --ui-font: var(--font-text); --ui-mono: var(--font-mono); --ui-radius: 16px; }
+
+  /* the startups' facts under each photograph */
+  .tile__facts { margin-top: 0; }
+
+  /* the reasons, each with its source number */
+  .facts { display: grid; }
+  .facts > li { padding: var(--s-4) 0; border-bottom: 1px solid var(--line); font-size: var(--t-body); line-height: 1.6; }
+  .facts > li:first-child { padding-top: 0; }
+  .facts sup { font-size: 13px; line-height: 0; color: var(--muted); }
+</style>
+</head>
+<body>
+<!-- type: software (site-kind software, kind software)
+     deal: hero collage, palette candy-on-black, type schibsted, radius round, nav nav-centre, close close-type,
+           footer footer-dark, rhythm space, buttons solid, mark wordmark, lit ground sky,
+           grounds bg-halo (#day) and bg-band bleed (#anywhere), effect silk-folds (hero frame)
+     moments: liquid-type in #anywhere (the claim answers the pointer), iris-opens in #schools (the ground turns as the page turns from the product to the reason)
+     photographs: stand-ins from Wikimedia Commons (Liwa, a falaj in Al Ain, the Hajar near Kalba, cranes in summer haze) -->
+<header class="nav nav--centre">
+  <div class="wrap nav__bar">
+    <a class="skip-link" href="#top">Skip to content</a>
+    <a class="nav__logo" href="#top">Shadowday</a>
+    <nav class="nav__links" aria-label="Main">
+      <div class="nav__item"><a class="nav__link" href="#day">Day</a></div>
+      <div class="nav__item"><a class="nav__link" href="#review">Review</a></div>
+      <div class="nav__item">
+        <a class="nav__link" href="#startups">Startups <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="nav__menu">
+          <div class="wrap grid">
+            <div class="menu-col span-3">
+              <p class="t-label">Startups</p>
+              <a href="#falaj-labs">Falaj Labs<span>Date-farm groundwater</span></a>
+              <a href="#wadiwatch">WadiWatch<span>Wadi flash-flood road closures</span></a>
+              <a href="#barid-labs">Barid Labs<span>Heat safety for outdoor workers</span></a>
+            </div>
+            <div class="menu-col span-3">
+              <p class="t-label">Where they work</p>
+              <a href="#anywhere">Areas<span>14 areas in all seven emirates</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nav__item"><a class="nav__link" href="#schools">Schools</a></div>
+      <div class="nav__item"><a class="nav__link" href="#questions">Questions</a></div>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--primary" href="/start">Start your first day</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-label="Menu">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero hero--collage" data-enter aria-labelledby="hero-h">
+    <div class="wrap"><div class="hero-text grid hero__grid">
+      <div class="hero__text span-5">
+        <h1 id="hero-h">Tech job simulator for UAE students</h1>
+        <p class="hero__lead">For secondary students from Liwa to Kalba: join a startup on a real problem near you, write Python, run real tests and get your code reviewed, all in the browser.</p>
+        <div class="btn-row"><a class="btn btn--primary" href="/start">Start your first day<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a><a class="btn btn--secondary" href="#day">See how the day runs</a></div>
+        <p class="hero__proof">Free, in English and Arabic.</p>
+      </div>
+      <div class="hero__art span-6 start-7" data-fx="silk-folds" data-fx-seed="4217" data-fx-palette='{"bg":"#c6d3df","surface":"#d6e0e9","ink":"#25303a","accent":"#7f9fbd"}' data-fx-params='{"tone":1,"calmX":0.3,"calmY":0.85}' role="img" aria-label="Shadowday's workday screen: ticket FLJ-42 open in pumps.py, Saeed explaining over-pumping in the team chat, Ravi asking a question, and the tests at 2 of 3 passing">
+        <div class="ly-piece ly-piece--main ui sd-win" aria-hidden="true">
+          <div class="sd-bar"><span class="ui-dots"><i></i><i></i><i></i></span><span class="sd-crumb">Falaj Labs <i>/</i> <b>FLJ-42</b></span><span class="ui-spacer"></span><span class="sd-day">Day 1, 11:40</span></div>
+          <div class="sd-ticket"><span class="sd-key">FLJ-42</span><span class="sd-title">Flag the days Saeed's farm is over-pumping</span><span class="ui-chip ui-chip--ink">In progress</span></div>
+          <div class="sd-body">
+            <div class="sd-code">
+              <div class="sd-tabs"><span class="sd-tab is-on"><img data-icon="python" src="assets/icons/python.svg" width="24" height="24" alt="">pumps.py</span><span class="sd-tab">test_pumps.py</span></div>
+              <div class="sd-outline"><span>parse_reading</span><span>daily_totals</span><span class="is-on">flag_overpumping</span></div>
+              <div class="sd-lines">
+                <span class="sd-ln"><i>5</i><span><span class="k">def</span> <span class="f">daily_totals</span>(readings):</span></span>
+                <span class="sd-ln"><i>6</i><span>    totals = <span class="f">defaultdict</span>(<span class="k">float</span>)</span></span>
+                <span class="sd-ln"><i>7</i><span>    <span class="k">for</span> day, litres <span class="k">in</span> readings:</span></span>
+                <span class="sd-ln"><i>8</i><span>        totals[<span class="v">day</span>] += litres</span></span>
+                <span class="sd-ln"><i>9</i><span>    <span class="k">return</span> <span class="f">sorted</span>(totals.items())</span></span>
+                <span class="sd-ln"><i>10</i><span> </span></span>
+                <span class="sd-ln"><i>11</i><span><span class="k">def</span> <span class="f">flag_overpumping</span>(days):</span></span>
+                <span class="sd-ln"><i>12</i><span class="c">    # Saeed: over 20% above the</span></span>
+                <span class="sd-ln"><i>13</i><span class="c">    # average of the 7 days before</span></span>
+                <span class="sd-ln"><i>14</i><span>    flagged = []</span></span>
+                <span class="sd-ln"><i>15</i><span>    <span class="k">for</span> i <span class="k">in</span> <span class="f">range</span>(<span class="f">len</span>(days)):</span></span>
+                <span class="sd-ln"><i>16</i><span>        day, litres = days[<span class="v">i</span>]</span></span>
+                <span class="sd-ln is-now"><i>17</i><span>        week = <span class="sd-caret"></span></span></span>
+                <span class="sd-ln"><i>18</i><span> </span></span>
+                <span class="sd-ln"><i>19</i><span>    <span class="k">return</span> flagged</span></span>
+                <span class="sd-ln"><i>20</i><span> </span></span>
+                <span class="sd-ln"><i>21</i><span><span class="k">def</span> <span class="f">load_farm</span>(path):</span></span>
+                <span class="sd-ln"><i>22</i><span>    <span class="k">with</span> <span class="f">open</span>(path) <span class="k">as</span> f:</span></span>
+                <span class="sd-ln"><i>23</i><span>        rows = <span class="f">map</span>(parse_reading, f)</span></span>
+                <span class="sd-ln"><i>24</i><span>    <span class="k">return</span> <span class="f">daily_totals</span>(rows)</span></span>
+              </div>
+            </div>
+            <div class="sd-chat">
+              <div class="sd-chat__head"><b># flj-42</b><span class="ui-spacer"></span><span>3 people</span></div>
+              <div class="sd-msg sd-msg--me"><span class="sd-msg__by"><b>You</b></span><span class="sd-msg__text">What counts as over-pumping?</span></div>
+              <div class="sd-msg"><span class="sd-msg__by"><span class="ui-avatar" data-tone="3">S</span><b>Saeed</b>customer</span><span class="sd-msg__text">If a day uses more than 20% above the average of the seven days before it, my wells are working too hard.</span></div>
+              <div class="sd-msg sd-msg--ravi"><span class="sd-msg__by"><span class="ui-avatar" data-tone="4">R</span><b>Ravi</b>senior engineer</span><span class="sd-msg__text">What would the average of the last seven days look like as a list?</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="ly-piece ly-piece--note ui sd-tests" aria-hidden="true">
+          <div class="sd-tests__head"><b>Tests</b><code>test_pumps.py</code><span class="ui-spacer"></span><span class="ui-chip ui-chip--plain">2 of 3 passing</span></div>
+          <div class="sd-test"><svg viewBox="0 0 16 16"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg><code>test_parse_reading</code></div>
+          <div class="sd-test"><svg viewBox="0 0 16 16"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg><code>test_daily_totals</code></div>
+          <div class="sd-test is-fail"><svg viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg><code>test_flag_overpumping</code><small>expected 3 days, got 0</small></div>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="section g2 bg-halo" id="day" aria-labelledby="day-h">
+    <div class="wrap">
+      <div class="group">
+        <div class="section-head">
+          <h2 id="day-h">Your first day, standup to Shadow Report. <span class="muted">In the browser.</span></h2>
+        </div>
+        <div class="grid">
+          <article class="card card--row span-6 m-nolift">
+            <h3>Starts with Mariam's standup</h3>
+            <p>Mariam, your engineering manager, hands you the ticket for the day.</p>
+            <div class="panel panel--flush" data-fx="fluted-glass" data-fx-seed="38" data-fx-params='{"speed":0}' role="img" aria-label="Mariam's standup list: the ticket taken, pumps.py read, three steps still to do">
+              <div class="stage stage--fade-b"><div class="at-rise fit" style="--fit-max:340px;--ax:max(24px, 50% - 170px);--ay:40px;--ay-sm:20px" data-ui-loop>
+                <div class="ui ui-panel ui-checks" data-ui="checklist">
+                  <div class="ui-checks__head">
+                    <div class="ui-title">Standup with Mariam</div>
+                    <span class="ui-spacer"></span>
+                    <div class="ui-meta" data-checks-count>2 of 5</div>
+                  </div>
+                  <div class="ui-checks__bar"><i data-checks-bar style="--k:0.4"></i></div>
+                  <ul class="ui-checks__list">
+                    <li class="ui-check is-done"><span class="ui-check__box"><svg viewBox="0 0 16 16"><path d="m4.5 8.2 2.3 2.3 4.7-5"/></svg></span><span class="ui-check__label">Take ticket FLJ-42</span></li>
+                    <li class="ui-check is-done"><span class="ui-check__box"><svg viewBox="0 0 16 16"><path d="m4.5 8.2 2.3 2.3 4.7-5"/></svg></span><span class="ui-check__label">Read pumps.py</span></li>
+                    <li class="ui-check"><span class="ui-check__box"><svg viewBox="0 0 16 16"><path d="m4.5 8.2 2.3 2.3 4.7-5"/></svg></span><span class="ui-check__label">Ask Saeed what he needs</span></li>
+                    <li class="ui-check"><span class="ui-check__box"><svg viewBox="0 0 16 16"><path d="m4.5 8.2 2.3 2.3 4.7-5"/></svg></span><span class="ui-check__label">Open a pull request</span></li>
+                    <li class="ui-check"><span class="ui-check__box"><svg viewBox="0 0 16 16"><path d="m4.5 8.2 2.3 2.3 4.7-5"/></svg></span><span class="ui-check__label">Demo to Mariam</span></li>
+                  </ul>
+                </div>
+              </div></div>
+            </div>
+          </article>
+          <article class="card card--row span-6 m-nolift">
+            <h3>Runs real tests in the browser</h3>
+            <p>Your Python runs on Pyodide, and real unit tests show what passes.</p>
+            <div class="panel panel--flush" data-fx="fluted-glass" data-fx-seed="45" data-fx-params='{"speed":0}' role="img" aria-label="A test run of test_pumps.py in the browser: three tests passed">
+              <div class="stage"><div class="at-rise fit" style="--fit-max:440px;--ax:max(24px, 50% - 220px);--ay:40px;--ay-sm:20px">
+                <div class="ui ui-panel ui-term" data-ui="terminal-run">
+                  <div class="ui-term__head">
+                    <span class="ui-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                    <span class="ui-term__title">wells</span>
+                    <span class="ui-meta">Pyodide</span>
+                    <span class="ui-spacer"></span>
+                    <span class="ui-chip ui-chip--plain ui-term__branch"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="3.5" r="1.5"/><circle cx="5" cy="12.5" r="1.5"/><circle cx="11" cy="5.5" r="1.5"/><path d="M5 5v6M11 7c0 2.6-6 1.8-6 4"/></svg>flj-42</span>
+                  </div>
+                  <div class="ui-term__screen" data-term-screen>
+                    <div class="ui-term__track" data-term-track>
+                      <div class="ui-term__ln ui-term__cmd"><span class="ui-term__cwd">~/<span class="ui-term__up">falaj-labs/</span>wells</span><span class="ui-term__sig">$</span><span class="ui-term__typed" data-term-cmd>pytest</span></div>
+                      <div class="ui-term__ln ui-term__meter" data-term-out data-term-meter><span class="ui-term__bar" style="--p:1"><i></i></span><span class="ui-term__count" data-term-count>3 of 3 tests</span></div>
+                      <div class="ui-term__ln ui-term__log" data-term-out data-term-step><svg class="ui-term__tick" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg><span class="ui-term__path">test_parse_reading</span><span class="ui-term__n">4 asserts</span><span class="ui-term__t">12ms</span></div>
+                      <div class="ui-term__ln ui-term__log" data-term-out data-term-step><svg class="ui-term__tick" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg><span class="ui-term__path">test_daily_totals</span><span class="ui-term__n">3 asserts</span><span class="ui-term__t">9ms</span></div>
+                      <div class="ui-term__ln ui-term__log" data-term-out data-term-step><svg class="ui-term__tick" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 8.4 2.8 2.8 6.2-6.4"/></svg><span class="ui-term__path">test_flag_overpumping</span><span class="ui-term__n">5 asserts</span><span class="ui-term__t">21ms</span></div>
+                      <div class="ui-term__ln ui-term__gap" data-term-out aria-hidden="true"></div>
+                      <div class="ui-term__ln ui-term__sum" data-term-out><span class="ui-term__key">Tests</span><span class="ui-term__val">3 passed</span><span class="ui-term__dim">(3)</span></div>
+                      <div class="ui-term__ln ui-term__done" data-term-out data-term-done><span class="ui-term__ok"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 8.3 2.4 2.4 4.6-5"/></svg></span><b>Passed</b><span class="ui-term__dim">in 0.42s</span></div>
+                      <div class="ui-term__ln ui-term__cmd" data-term-next><span class="ui-term__cwd">~/<span class="ui-term__up">falaj-labs/</span>wells</span><span class="ui-term__sig">$</span><span class="ui-term__typed"></span><i class="ui-term__caret" aria-hidden="true"></i></div>
+                    </div>
+                  </div>
+                </div>
+              </div></div>
+            </div>
+          </article>
+        </div>
+      </div>
+      <div class="grid">
+        <article class="card card--row span-6 m-nolift">
+          <h3>Demos on data from your area</h3>
+          <p>You demo on real-looking local data, then Mariam reviews your day.</p>
+          <div class="panel panel--flush" data-fx="fluted-glass" data-fx-seed="52" data-fx-params='{"speed":0}' role="img" aria-label="A demo chart of water pumped on Saeed's farm over 14 days, with today over the limit">
+            <div class="stage stage--fade-b"><div class="at-right" style="--ax:32px;--ay:40px;--ay-sm:20px">
+              <div class="ui ui-panel ui-stat" data-ui="stat" data-from="2" data-to="3" data-suffix=" days" data-values="41,43,40,44,42,52,43,41,45,44,54,43,42,55" data-prev="41,43,40,44,42,52,43,41,45,44,54,43,42,44">
+                <div class="ui-stat__head">
+                  <div class="ui-stat__top">
+                    <span class="ui-stat__label">Days over the limit</span>
+                  </div>
+                  <div class="ui-stat__line">
+                    <span class="ui-stat__num" data-stat-num>3 days</span>
+                    <span class="ui-stat__sub">Saeed's farm, last 14 days</span>
+                  </div>
+                </div>
+                <div class="ui-stat__chart">
+                  <svg class="ui-stat__svg" viewBox="0 0 400 120" preserveAspectRatio="none" aria-hidden="true">
+                    <path class="ui-stat__grid" d="M0 30.5H400M0 60.5H400M0 90.5H400"/>
+                    <path class="ui-stat__cover" fill-rule="evenodd" d=""/>
+                    <g class="ui-stat__bars"></g>
+                  </svg>
+                  <div class="ui-stat__axis" aria-hidden="true"><span>Nov 4</span><span>Nov 11</span><span>Today</span></div>
+                </div>
+              </div>
+            </div></div>
+          </div>
+        </article>
+        <article class="card card--row span-6 m-nolift">
+          <h3>Ends with your Shadow Report</h3>
+          <p>What you did, the skills you showed and a project to download.</p>
+          <div class="panel panel--flush" data-fx="fluted-glass" data-fx-seed="59" data-fx-params='{"speed":0}' role="img" aria-label="The Shadow Report and the project's files, ready to download">
+            <div class="stage stage--fade-br"><div class="at-corner wide" style="--w:680px;--ax:32px;--ay:40px;--ay-sm:20px">
+              <div class="ui ui-files" data-ui="files" data-reading="Packing {n} of {total}">
+                <div class="ui-files__status"><span class="ui-dot"></span><span data-files-status>6 files ready</span></div>
+                <ul class="ui-files__grid">
+                  <li class="ui-file is-done"><span class="ui-file__icon"><img data-icon="pdf" src="assets/icons/pdf.svg" width="24" height="24" loading="lazy" decoding="async" alt=""></span><span class="ui-file__name">Shadow Report</span><span class="ui-file__kind">PDF</span><span class="ui-file__bar"><i></i></span><span class="ui-file__check"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 8.2 2.3 2.3 4.7-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></li>
+                  <li class="ui-file is-done"><span class="ui-file__icon"><img data-icon="py" src="assets/icons/py.svg" width="24" height="24" loading="lazy" decoding="async" alt=""></span><span class="ui-file__name">pumps.py</span><span class="ui-file__kind">Python</span><span class="ui-file__bar"><i></i></span><span class="ui-file__check"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 8.2 2.3 2.3 4.7-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></li>
+                  <li class="ui-file is-done"><span class="ui-file__icon"><img data-icon="py" src="assets/icons/py.svg" width="24" height="24" loading="lazy" decoding="async" alt=""></span><span class="ui-file__name">test_pumps.py</span><span class="ui-file__kind">Python</span><span class="ui-file__bar"><i></i></span><span class="ui-file__check"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 8.2 2.3 2.3 4.7-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></li>
+                  <li class="ui-file is-done"><span class="ui-file__icon"><img data-icon="json" src="assets/icons/json.svg" width="24" height="24" loading="lazy" decoding="async" alt=""></span><span class="ui-file__name">liwa.json</span><span class="ui-file__kind">Area data</span><span class="ui-file__bar"><i></i></span><span class="ui-file__check"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 8.2 2.3 2.3 4.7-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></li>
+                  <li class="ui-file is-done"><span class="ui-file__icon"><img data-icon="md" src="assets/icons/md.svg" width="24" height="24" loading="lazy" decoding="async" alt=""></span><span class="ui-file__name">README.md</span><span class="ui-file__kind">Markdown</span><span class="ui-file__bar"><i></i></span><span class="ui-file__check"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 8.2 2.3 2.3 4.7-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></li>
+                  <li class="ui-file is-done"><span class="ui-file__icon"><img data-icon="zip" src="assets/icons/zip.svg" width="24" height="24" loading="lazy" decoding="async" alt=""></span><span class="ui-file__name">falaj-labs.zip</span><span class="ui-file__kind">ZIP</span><span class="ui-file__bar"><i></i></span><span class="ui-file__check"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 8.2 2.3 2.3 4.7-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></li>
+                </ul>
+              </div>
+            </div></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="review" aria-labelledby="review-h">
+    <div class="wrap">
+      <div class="grid">
+        <h2 class="span-5" id="review-h">Pull request reviews from Ravi</h2>
+        <div class="span-6 start-7 stack-4">
+          <p class="muted t-lead">When your tests pass, you open a pull request. Ravi, the senior engineer, reviews it and leaves a question on the line to look at again.</p>
+          <a class="link" href="#startups">See the three startups</a>
+        </div>
+      </div>
+      <div class="ui app fill" role="img" aria-label="Shadowday's day log beside pull request 7: Ravi asks which day is the first with seven days before it, on the loop line of pumps.py" data-ui-pause-host>
+        <div class="app__pane app__pane--list">
+          <div class="ui ui-panel ui-win" data-ui="window" data-open="Open" data-work="Working" data-done="Done">
+            <div class="ui-win__bar">
+              <span class="ui-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="ui-win__crumb">Falaj Labs <i>/</i> <b>Today</b></span>
+              <span class="ui-spacer"></span>
+              <span class="ui-win__search" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg><span class="ui-win__ph">Search</span><span class="ui-kbd">/</span></span>
+            </div>
+            <div class="ui-win__body">
+              <nav class="ui-win__side" aria-hidden="true">
+                <span class="ui-win__nav is-on"><svg class="ui-icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/></svg>Today<em>9</em></span>
+                <span class="ui-win__nav"><svg class="ui-icon" viewBox="0 0 16 16"><path d="M3 3.5h10v9H3z"/><path d="M5.5 6.5h5M5.5 9.5h3"/></svg>Tickets<em>1</em></span>
+                <span class="ui-win__nav"><svg class="ui-icon" viewBox="0 0 16 16"><circle cx="5" cy="3.5" r="1.5"/><circle cx="5" cy="12.5" r="1.5"/><circle cx="11" cy="12.5" r="1.5"/><path d="M5 5v6M11 11V7.5a2 2 0 0 0-2-2H7"/></svg>Reviews<em>1</em></span>
+                <span class="ui-win__label">Channels</span>
+                <span class="ui-win__nav"><span class="ui-win__hash">#</span>standup</span>
+                <span class="ui-win__nav"><span class="ui-win__hash">#</span>flj-42</span>
+              </nav>
+              <div class="ui-win__main">
+                <div class="ui-win__cols" aria-hidden="true"><span>Who</span><span>What</span><span>Status</span><span>Time</span></div>
+                <ul class="ui-win__rows">
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="2">R</span><span class="ui-win__who">Ravi</span><span class="ui-win__sub">Pull request 7: pumps.py, +5 −1</span><span class="ui-win__st is-you" data-st>Needs you</span><span class="ui-win__age">11:40</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="1">T</span><span class="ui-win__who">Tests</span><span class="ui-win__sub">test_pumps.py, 3 of 3 passing</span><span class="ui-win__st is-done" data-st>Done</span><span class="ui-win__age">11:32</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="2">R</span><span class="ui-win__who">Ravi</span><span class="ui-win__sub">Asked about the seven-day average</span><span class="ui-win__st is-done" data-st>Done</span><span class="ui-win__age">10:40</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="3">S</span><span class="ui-win__who">Saeed</span><span class="ui-win__sub">Explained what over-pumping means</span><span class="ui-win__st is-done" data-st>Done</span><span class="ui-win__age">10:12</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="4">Y</span><span class="ui-win__who">You</span><span class="ui-win__sub">Read ticket FLJ-42</span><span class="ui-win__st is-done" data-st>Done</span><span class="ui-win__age">9:10</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="5">M</span><span class="ui-win__who">Mariam</span><span class="ui-win__sub">Standup: FLJ-42 is yours today</span><span class="ui-win__st is-done" data-st>Done</span><span class="ui-win__age">9:00</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="5">M</span><span class="ui-win__who">Mariam</span><span class="ui-win__sub">Demo on the farm's well data</span><span class="ui-win__st" data-st>Later</span><span class="ui-win__age">14:00</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="5">M</span><span class="ui-win__who">Mariam</span><span class="ui-win__sub">End-of-day review</span><span class="ui-win__st" data-st>Later</span><span class="ui-win__age">15:30</span></li>
+                  <li class="ui-win__row" data-row><span class="ui-avatar" data-tone="1">S</span><span class="ui-win__who">Shadowday</span><span class="ui-win__sub">Your Shadow Report</span><span class="ui-win__st" data-st>Later</span><span class="ui-win__age">16:00</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="app__pane app__pane--open" data-ui-loop>
+          <div class="ui ui-panel ui-diff" data-ui="diff-review">
+            <div class="ui-diff__head">
+              <svg class="ui-icon ui-diff__fold" viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 6.25 3.5 3.5 3.5-3.5"/></svg>
+              <span class="ui-diff__tool" aria-hidden="true"><img data-icon="python" src="assets/icons/python.svg" width="24" height="24" loading="lazy" decoding="async" alt=""></span>
+              <span class="ui-diff__repo">falaj-labs/wells</span><i class="ui-diff__slash" aria-hidden="true">/</i>
+              <span class="ui-diff__path"><span class="ui-diff__dir">src/</span><b>pumps.py</b></span>
+              <span class="ui-spacer"></span>
+              <span class="ui-diff__stat"><b class="is-add"><span class="ui-diff__was">+5</span><span class="ui-diff__now">+6</span></b><b class="is-del"><span class="ui-diff__was">&minus;1</span><span class="ui-diff__now">&minus;2</span></b><span class="ui-diff__bar" aria-hidden="true"><i class="is-add"></i><i class="is-add"></i><i class="is-add"></i><i class="is-add"></i><i class="is-del"></i></span></span>
+            </div>
+            <div class="ui-diff__hunk"><span>@@ -13,11 +13,15 @@</span> <em class="ui-diff__sig">def flag_overpumping(days):</em></div>
+            <div class="ui-diff__lines">
+              <div class="ui-diff__ln"><i>13</i><i>13</i><span class="ui-diff__code" data-i="1"><span class="ui-diff__ind">    </span><span class="n"># average of the 7 days before</span></span></div>
+              <div class="ui-diff__ln"><i>14</i><i>14</i><span class="ui-diff__code" data-i="1"><span class="ui-diff__ind">    </span>flagged = []</span></div>
+              <div class="ui-diff__ln is-target" data-diff-target><i>15</i><i>15</i><span class="ui-diff__code" data-i="1"><span class="ui-diff__ind">    </span><span class="k">for</span> i <span class="k">in</span> <span class="f">range</span>(<mark class="ui-diff__w"><span class="f">len</span>(days)</mark>):</span></div>
+              <div class="ui-diff__sug" data-diff-sug><div class="ui-diff__ln is-add"><i></i><i>15</i><span class="ui-diff__code" data-i="1"><span class="ui-diff__ind">    </span><span class="k">for</span> i <span class="k">in</span> <span class="f">range</span>(<mark class="ui-diff__w"><span class="n">7</span>, <span class="f">len</span>(days)</mark>):</span></div></div>
+              <div class="ui-diff__thread">
+                <div class="ui-diff__by">
+                  <span class="ui-avatar" data-tone="4">R</span>
+                  <span class="ui-diff__name">Ravi</span>
+                  <span class="ui-diff__time">2m</span>
+                  <span class="ui-spacer"></span>
+                  <span class="ui-diff__act" data-diff-act>
+                    <button class="ui-btn ui-btn--sm ui-diff__apply" type="button" tabindex="-1" data-diff-apply><span class="ui-diff__lbl">Push your fix</span><i class="ui-diff__spin" aria-hidden="true"></i></button>
+                    <span class="ui-chip ui-diff__done"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 8.4 2.6 2.6L12 5.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Resolved</span>
+                  </span>
+                </div>
+                <div class="ui-diff__msg">Which day is the first one with seven days before it? Try <code>days[i - <span class="n">7</span>:i]</code> on day 3.</div>
+              </div>
+              <div class="ui-diff__ln is-del"><i>16</i><i></i><span class="ui-diff__code" data-i="2"><span class="ui-diff__ind">        </span><span class="k">pass</span></span></div>
+              <div class="ui-diff__ln is-add"><i></i><i>16</i><span class="ui-diff__code" data-i="2"><span class="ui-diff__ind">        </span>day, litres = days[<span class="v">i</span>]</span></div>
+              <div class="ui-diff__ln is-add"><i></i><i>17</i><span class="ui-diff__code" data-i="2"><span class="ui-diff__ind">        </span>week = [l <span class="k">for</span> _, l <span class="k">in</span> days[i - <span class="n">7</span>:i]]</span></div>
+              <div class="ui-diff__ln is-add"><i></i><i>18</i><span class="ui-diff__code" data-i="2"><span class="ui-diff__ind">        </span>average = <span class="f">sum</span>(week) / <span class="n">7</span></span></div>
+              <div class="ui-diff__ln is-add"><i></i><i>19</i><span class="ui-diff__code" data-i="2"><span class="ui-diff__ind">        </span><span class="k">if</span> litres &gt; average * <span class="n">1.2</span>:</span></div>
+              <div class="ui-diff__ln is-add"><i></i><i>20</i><span class="ui-diff__code" data-i="3"><span class="ui-diff__ind">            </span>flagged.<span class="f">append</span>(day)</span></div>
+              <div class="ui-diff__ln"><i>17</i><i>21</i><span class="ui-diff__code" data-i="1"><span class="ui-diff__ind">    </span><span class="k">return</span> flagged</span></div>
+              <div class="ui-diff__ln"><i>18</i><i>22</i><span class="ui-diff__code" data-i="0"></span></div>
+              <div class="ui-diff__ln"><i>19</i><i>23</i><span class="ui-diff__code" data-i="0"><span class="k">def</span> <span class="f">load_farm</span>(path):</span></div>
+              <div class="ui-diff__ln"><i>20</i><i>24</i><span class="ui-diff__code" data-i="1"><span class="ui-diff__ind">    </span><span class="k">with</span> <span class="f">open</span>(path) <span class="k">as</span> f:</span></div>
+              <div class="ui-diff__ln"><i>21</i><i>25</i><span class="ui-diff__code" data-i="2"><span class="ui-diff__ind">        </span>rows = [<span class="f">parse_reading</span>(r) <span class="k">for</span> r <span class="k">in</span> f]</span></div>
+              <div class="ui-diff__ln"><i>22</i><i>26</i><span class="ui-diff__code" data-i="1"><span class="ui-diff__ind">    </span><span class="k">return</span> <span class="f">daily_totals</span>(rows)</span></div>
+              <div class="ui-diff__ln"><i>23</i><i>27</i><span class="ui-diff__code" data-i="0"></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section bg-band bg-bleed" id="anywhere" aria-labelledby="anywhere-h">
+    <div class="wrap">
+      <div data-moment="liquid-type" class="section-head" style="max-width:none">
+        <h2 class="mo-lt__type" id="anywhere-h">Innovation shouldn't depend on location.</h2>
+      </div>
+      <div class="grid">
+        <p class="span-5 t-lead">The same first day runs in 14 areas across all seven emirates. Each area is one data file, so a new town needs no new code.</p>
+        <dl class="areas span-6 start-7">
+          <div><dt>Abu Dhabi</dt><dd>Liwa, Madinat Zayed, Al Ain, Ruwais, Musaffah</dd></div>
+          <div><dt>Sharjah</dt><dd>Sharjah, Khor Fakkan, Kalba</dd></div>
+          <div><dt>Fujairah</dt><dd>Fujairah, Dibba Al Fujairah</dd></div>
+          <div><dt>Dubai</dt><dd>Hatta</dd></div>
+          <div><dt>Other emirates</dt><dd>Ajman, Umm Al Quwain, Ras Al Khaimah</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="startups" aria-labelledby="startups-h">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="startups-h">Startups working on problems from Liwa to Kalba</h2>
+      </div>
+      <div class="grid">
+        <article class="tile span-4" id="falaj-labs">
+          <div class="tile__media"><img src="assets/img/photo-f8672263-500.jpg" width="500" height="746" alt="A stone falaj channel carrying water between date palms in Al Ain" loading="lazy" decoding="async" style="object-position: 50% 62%" data-source="stand-in" data-subject="a falaj irrigation channel in a date palm oasis"></div>
+          <div class="tile__head"><h3>Falaj Labs</h3></div>
+          <p>Date-farm groundwater, for Saeed, a date farmer.</p>
+          <p class="tile__facts">Liwa, Al Ain, Madinat Zayed</p>
+        </article>
+        <article class="tile span-4" id="wadiwatch">
+          <div class="tile__media"><img src="assets/img/photo-f167591890-960.jpg" srcset="assets/img/photo-f167591890-500.jpg 500w, assets/img/photo-f167591890-960.jpg 960w" sizes="(max-width: 639px) 342px, (max-width: 1023px) 50vw, 410px" width="960" height="640" alt="The Hajar mountains and their wadis near Kalba" loading="lazy" decoding="async" data-source="stand-in" data-subject="the Hajar mountains near Kalba"></div>
+          <div class="tile__head"><h3>WadiWatch</h3></div>
+          <p>Wadi flash-flood road closures, for Khalid, a roads coordinator.</p>
+          <p class="tile__facts">Fujairah, Dibba, Khor Fakkan, Kalba, Hatta, Ras Al Khaimah</p>
+        </article>
+        <article class="tile span-4" id="barid-labs">
+          <div class="tile__media"><img src="assets/img/photo-f68035539-960.jpg" srcset="assets/img/photo-f68035539-500.jpg 500w, assets/img/photo-f68035539-960.jpg 960w, assets/img/photo-f68035539.jpg 1280w" sizes="(max-width: 639px) 342px, (max-width: 1023px) 50vw, 410px" width="960" height="640" alt="Tower cranes over a building site in hazy summer sun" loading="lazy" decoding="async" data-source="stand-in" data-subject="a construction site in summer heat"></div>
+          <div class="tile__head"><h3>Barid Labs</h3></div>
+          <p>Outdoor workers' heat safety, for Fatima, a site safety officer.</p>
+          <p class="tile__facts">Ruwais, Musaffah, Sharjah, Ajman, Umm Al Quwain</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section ground-inverse" id="schools" data-moment="iris-opens" data-moment-opts='{"from": "base"}' style="--mo-gap: clamp(24px, 2.5vw, 32px)" aria-labelledby="schools-h">
+    <div class="wrap">
+      <div class="grid">
+        <div class="span-5 stack-5">
+          <h2 id="schools-h">Shadowday and UAE schools</h2>
+          <ul class="facts">
+            <li>Since the 2025–26 school year, AI has been a required subject in every UAE public school, from kindergarten to Grade 12.<sup>1</sup></li>
+            <li>Dubai-based companies raised about 98% of UAE tech funding in the first nine months of 2025, by Tracxn's data.<sup>2</sup></li>
+            <li>Children who grow up around inventors are much more likely to become inventors.<sup>3</sup></li>
+          </ul>
+          <p class="t-lead">A student in Liwa, Dibba or Kalba learns AI in class but never sees an engineer's day. Shadowday shows one, and lets them do it.</p>
+        </div>
+        <div class="frame frame--photo span-6 start-7">
+          <img class="frame__img" src="assets/img/photo-f167107634-960.jpg" srcset="assets/img/photo-f167107634-500.jpg 500w, assets/img/photo-f167107634-960.jpg 960w" sizes="(max-width: 639px) 342px, (max-width: 1023px) 100vw, 1060px" width="960" height="640" alt="Date palms in the Liwa oasis with the sand dunes behind them" loading="lazy" decoding="async" data-source="stand-in" data-subject="the Liwa oasis and its dunes">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="questions" aria-labelledby="questions-h">
+    <div class="wrap">
+      <div class="grid">
+        <div class="span-5">
+          <h2 id="questions-h">Questions from students and teachers</h2>
+          <div class="ui sd-ar" dir="rtl" lang="ar" role="img" aria-label="Shadowday's team chat in Arabic, set right to left: you ask Saeed what counts as over-pumping, and he answers">
+            <div class="sd-chat">
+              <div class="sd-chat__head"><b dir="ltr"># flj-42</b><span class="ui-spacer"></span><span>ثلاثة أشخاص</span></div>
+              <div class="sd-msg sd-msg--me"><span class="sd-msg__by"><b>أنت</b></span><span class="sd-msg__text">ما الذي يُعدّ ضخًّا زائدًا؟</span></div>
+              <div class="sd-msg"><span class="sd-msg__by"><span class="ui-avatar" data-tone="3">س</span><b>سعيد</b>العميل</span><span class="sd-msg__text">إذا زاد استهلاك يومٍ ما بأكثر من 20% على متوسط الأيام السبعة التي سبقته، فآباري تعمل فوق طاقتها.</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="faq span-6 start-7">
+          <div class="faq__item"><h3>Can I use Shadowday in Arabic?</h3><p>Yes. Every screen works in Arabic, right to left.</p></div>
+          <div class="faq__item"><h3>Why ask the customer questions?</h3><p>Each customer knows a rule the ticket leaves out, like Saeed's 20% limit.</p></div>
+          <div class="faq__item"><h3>Does Ravi write my code?</h3><p>No. He answers with questions, so the code you push is yours.</p></div>
+          <div class="faq__item"><h3>Do I join Falaj Labs, WadiWatch or Barid Labs?</h3><p>You join the one in the area you pick: Liwa puts you at Falaj Labs.</p></div>
+          <div class="faq__item"><h3>Is Falaj Labs a real startup?</h3><p>No. All three startups are made up; the problems they work on are real.</p></div>
+          <div class="faq__item"><h3>Can teachers use it with their students?</h3><p>Yes. Students open it in a browser; the school sets nothing up.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer closing footer--dark ground-inverse g2m" id="contact" aria-labelledby="close-h">
+  <div class="wrap">
+    <div class="closing__cta close--type">
+      <div class="section-head">
+        <h2 id="close-h">Your first day starts in the browser</h2>
+        <p>No account and nothing to download, on a phone or a school laptop.</p>
+      </div>
+      <a class="btn btn--primary btn--xl btn--wide" href="/start">Start your first day<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+    </div>
+    <div class="closing__links">
+      <div class="grid">
+        <div class="span-4 stack-4">
+          <a class="nav__logo footer__mark" href="#top">Shadowday</a>
+          <p class="footer__lede">A first day at a tech job, from anywhere in the UAE.</p>
+        </div>
+        <div class="span-2 start-5 footer__col"><h3>Day</h3><ul><li><a href="#day">Day</a></li><li><a href="#review">Review</a></li><li><a href="#anywhere">Areas</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Startups</h3><ul><li><a href="#falaj-labs">Falaj Labs</a></li><li><a href="#wadiwatch">WadiWatch</a></li><li><a href="#barid-labs">Barid Labs</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Schools</h3><ul><li><a href="#schools">Schools</a></li><li><a href="#questions">Questions</a></li></ul></div>
+        <div class="span-2 footer__col" id="sources"><h3>Sources</h3><ul><li><a href="https://www.wam.ae/en/article/15qfeob-national-identity-shape-uae%E2%80%99s-2025%E2%80%932026-academic">1 WAM, 2025</a></li><li><a href="https://valu.vc/uae-startup-funding/">2 Tracxn data via Valu.vc</a></li><li>3 Bell et al., Quarterly Journal of Economics, 2019</li></ul></div>
+      </div>
+      <div class="footer__legal">
+        <span>&copy; 2026 Shadowday. Product names and logos are trademarks of their owners.</span>
+        <a class="credits" href="assets/credits.html">Photographs via Wikimedia Commons</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="assets/system.js"></script>
+<script type="module" src="assets/motion/motion.js"></script>
+<script type="module" src="assets/layout/layout.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Shadowday video cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..700&family=JetBrains+Mono:wght@400..500&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#000; --ink:#fff; --muted:#999; --accent:#93f1f7; --good:#9ae187; --bad:#ff8a80; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1920px; height: 1080px; background: var(--bg); color: var(--ink); font-family: "Schibsted Grotesk", system-ui, sans-serif; overflow: hidden; }
+  .card { display: none; position: absolute; inset: 0; padding: 140px 160px; flex-direction: column; justify-content: center; }
+  .card.on { display: flex; }
+  .eyebrow { font-family: "JetBrains Mono", monospace; color: var(--accent); font-size: 30px; letter-spacing: .02em; }
+  h1 { font-weight: 400; font-size: 168px; letter-spacing: -0.045em; line-height: .95; }
+  h2 { font-weight: 400; font-size: 92px; letter-spacing: -0.04em; line-height: 1.02; max-width: 1500px; }
+  p.lead { color: var(--muted); font-size: 44px; line-height: 1.3; margin-top: 40px; max-width: 1400px; }
+  .big { font-size: 260px; letter-spacing: -0.05em; line-height: .9; color: var(--accent); }
+  .src { position: absolute; left: 160px; bottom: 90px; color: #6f6f6f; font-size: 24px; font-family: "JetBrains Mono", monospace; }
+  .enter > * { opacity: 0; transform: translateY(24px); animation: in .8s cubic-bezier(.2,.7,.2,1) forwards; }
+  .enter > *:nth-child(2) { animation-delay: .25s; } .enter > *:nth-child(3) { animation-delay: .5s; } .enter > *:nth-child(4) { animation-delay: .75s; }
+  @keyframes in { to { opacity: 1; transform: none; } }
+  .row { display: flex; gap: 28px; margin-top: 56px; }
+  .chip { border: 1px solid rgba(255,255,255,.16); border-radius: 999px; padding: 18px 30px; font-size: 32px; color: #ddd; }
+  .chip b { color: var(--accent); font-weight: 500; }
+  img.arch { width: 1600px; height: 900px; position: absolute; left: 160px; top: 90px; }
+</style>
+</head>
+<body>
+  <section class="card" id="title">
+    <div class="enter">
+      <p class="eyebrow">Bridge The Gap Hacks · 2026</p>
+      <h1 style="margin-top:40px">Shadowday</h1>
+      <p class="lead">A first day at a tech job, from anywhere in the UAE.</p>
+    </div>
+  </section>
+
+  <section class="card" id="stat1">
+    <div class="enter">
+      <p class="eyebrow">Since the 2025–26 school year</p>
+      <h2 style="margin-top:40px">Every UAE public school teaches AI, from kindergarten to Grade 12.</h2>
+    </div>
+    <p class="src">Source: WAM, UAE Ministry of Education announcement, 2025</p>
+  </section>
+
+  <section class="card" id="stat2">
+    <div class="enter">
+      <p class="eyebrow">But the tech is in one place</p>
+      <p class="big" style="margin-top:30px">~98%</p>
+      <h2 style="margin-top:30px;font-size:72px">of UAE tech funding in Jan–Sep 2025 went to Dubai-based companies.</h2>
+    </div>
+    <p class="src">Source: Tracxn data, as reported by Valu.vc</p>
+  </section>
+
+  <section class="card" id="stat3">
+    <div class="enter">
+      <p class="eyebrow">Exposure decides who innovates</p>
+      <h2 style="margin-top:40px">Children who grow up around inventors are far more likely to become inventors.</h2>
+    </div>
+    <p class="src">Bell, Chetty, Jaravel, Petkova &amp; Van Reenen, Quarterly Journal of Economics, 2019</p>
+  </section>
+
+  <section class="card" id="arch">
+    <img class="arch" src="../../docs/architecture.svg" alt="Architecture">
+  </section>
+
+  <section class="card" id="close">
+    <div class="enter">
+      <h2>Talent is everywhere in the UAE.<br>Now the first day can be too.</h2>
+      <div class="row">
+        <span class="chip"><b>Free</b> · no account</span>
+        <span class="chip"><b>English</b> + <b>العربية</b></span>
+        <span class="chip"><b>Phone</b> or laptop</span>
+      </div>
+      <p class="lead" style="margin-top:70px;color:var(--ink);font-size:56px">Shadowday</p>
+    </div>
+  </section>
+
+<script>
+  const show = () => {
+    const id = (location.hash || '#title').slice(1);
+    document.querySelectorAll('.card').forEach(c => c.classList.toggle('on', c.id === id));
+  };
+  addEventListener('hashchange', show); show();
+</script>
+</body>
+</html>

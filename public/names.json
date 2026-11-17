@@ -1,0 +1,10 @@
+{
+  "note": "Every name on the page comes from the brief; nothing was coined, so no search was needed (copy.md, Names are coined).",
+  "names": [
+    { "name": "Shadowday", "kind": "the product", "source": "brief", "searched": false },
+    { "name": "Falaj Labs", "kind": "a fictional startup inside the product", "source": "brief", "searched": false },
+    { "name": "WadiWatch", "kind": "a fictional startup inside the product", "source": "brief", "searched": false },
+    { "name": "Barid Labs", "kind": "a fictional startup inside the product", "source": "brief", "searched": false },
+    { "name": "Mariam, Ravi, Saeed, Khalid, Fatima", "kind": "the product's AI coworkers and customers", "source": "brief", "searched": false }
+  ]
+}

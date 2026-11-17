@@ -1,0 +1,401 @@
+{
+ "start": "2026-11-17T06:36:17.923Z",
+ "round": 0,
+ "idle": 0,
+ "errors": 0,
+ "status": "pass",
+ "history": [
+  {
+   "at": "2026-11-17T06:44:42.031Z",
+   "mode": "hook",
+   "host": "claude",
+   "decision": "block",
+   "reason": "a build is active in /Users/rithwik/BridgeTheGapHacks/shadowday, but no page was found in /Users/rithwik/BridgeTheGapHacks/shadowday, so nothing was checked. If",
+   "stopHookActive": false
+  },
+  {
+   "at": "2026-11-17T06:44:48.079Z",
+   "mode": "hook",
+   "host": "claude",
+   "decision": "allow",
+   "reason": "no page was found in /Users/rithwik/BridgeTheGapHacks/shadowday; told once, stop allowed",
+   "stopHookActive": true
+  },
+  {
+   "at": "2026-11-17T07:16:05.539Z",
+   "mode": "hook",
+   "host": "claude",
+   "status": "error",
+   "fails": 0,
+   "round": 0,
+   "reused": false,
+   "stopHookActive": false,
+   "decision": "block",
+   "reason": "the checks could not run (consistency.mjs gave no report (exit 1: Error: No Chrome, Edge or Chromium found; set CHROME_PATH.); check.mjs could not run (exit 2: "
+  },
+  {
+   "at": "2026-11-17T07:16:21.271Z",
+   "mode": "hook",
+   "host": "claude",
+   "status": "error",
+   "fails": 0,
+   "round": 0,
+   "reused": false,
+   "stopHookActive": true,
+   "decision": "allow",
+   "reason": "checks crashed (consistency.mjs gave no report (exit 1: Error: No Chrome, Edge or Chromium found; set CHROME_PATH.); check.mjs could not run (exit 2: no Chrome "
+  },
+  {
+   "at": "2026-11-17T07:19:38.132Z",
+   "mode": "hook",
+   "host": "claude",
+   "decision": "allow",
+   "reason": "the checks crashed on this unchanged page and the agent was told; stop allowed",
+   "stopHookActive": false
+  },
+  {
+   "at": "2026-11-17T10:00:02.429Z",
+   "mode": "manual",
+   "status": "pass",
+   "fails": 0,
+   "round": 0,
+   "reused": false,
+   "stopHookActive": false
+  }
+ ],
+ "max": 3,
+ "marker": {
+  "page": "public/index.html",
+  "url": null,
+  "root": "public",
+  "kind": "software",
+  "category": "first-day job simulation for UAE students",
+  "primary": "Start your first day",
+  "rounds": 3,
+  "start": "2026-11-17T06:36:17.923Z",
+  "by": "gate.mjs --start"
+ },
+ "setupTold": true,
+ "session": "0316858a-93dc-4e97-8e82-01358ce403e6",
+ "at": "2026-11-17T10:00:02.430Z",
+ "fp": "26db0cfe68c773d8",
+ "page": "public/index.html",
+ "found": {
+  "fails": [],
+  "warns": [
+   {
+    "check": "cut-text",
+    "where": "div.ui-win__main > ul.ui-win__rows > li.ui-win__row:nth-of-type(9) > span.ui-win__sub \"Your Shadow Report\"",
+    "msg": "cut 12px at the bottom by the overflow of section#review > div.wrap > div.ui.app > div.app__pane.app__pane--list: a fragment run out through its panel's edge (and 1 more like it: \"Later\")",
+    "fix": "give the text room: no overflow clipping a line, no line past its box",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "copy-headings",
+    "where": "div.group > div.grid > article.card.card--row:nth-of-type(2) > h3 \"Runs real tests in the browser\"",
+    "msg": "the card title \"Runs real tests in the browser\" names no product, part, place or section (3 card titles like it) (and 2 more like it: \"Demos on data from your \", \"Ends with your Shadow Re\")",
+    "fix": "name the thing in every heading: the product, a part, the place or a section noun",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "contrast",
+    "where": "h2#anywhere-h \"Innovation shouldn't depend on location.\"",
+    "msg": "large text over a picture reads at 1.4:1 at its worst tenth (needs 3:1), on a busy ground (inside a held section or scroll scene, whose motion --quick does not check)",
+    "fix": "put the text on a calm part of the picture, or on a solid panel",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "text-contrast",
+    "where": "div.ui-win__main > ul.ui-win__rows > li.ui-win__row:nth-of-type(2) > span.ui-avatar \"T\"",
+    "msg": "11 lines of text in drawn mocks read under 4.5:1 (5 colour pairs), the worst \"T\" in #ad7f6f on #51403c at 2.81:1",
+    "fix": "lift the mocks' muted text (labels, meta, initials) to 4.5:1 on their own panel, or set it larger",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "busy-ground",
+    "where": "section#anywhere > div.wrap > div.grid > p.span-5.t-lead \"The same first day runs in 14 areas acro\"",
+    "msg": "text over a detailed part of a picture (its ground changes by 1.6 L* from one pixel to the next under the words) (and 10 more like it: \"Abu Dhabi\", \"Liwa, Madinat Zayed, Al \", \"Sharjah\", \"Sharjah, Khor Fakkan, Ka\", ...)",
+    "fix": "move the text to a calm part of the picture, or put it on a panel",
+    "widths": [
+     1440,
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "section-gaps",
+    "where": "section#questions / footer#contact",
+    "msg": "290px between these sections, +54% against the median 188px",
+    "fix": "use one gap between sections (all within 25% of each other)",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "section-gaps",
+    "where": "section#startups / section#schools",
+    "msg": "uneven space at the edge of a band: 176px outside its edge, 32px inside it (the space on either side of a change of ground reads as one gap only when the two match)",
+    "fix": "use one gap between sections (all within 25% of each other)",
+    "widths": [
+     1440,
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "links",
+    "where": "header.nav.nav--centre > div.wrap.nav__bar > div.nav__actions > a.btn.btn--primary \"Start your first day\"",
+    "msg": "\"Start your first day\" goes to /start, which does not exist here",
+    "fix": "point every link at a real section, page or file",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "photo-credit",
+    "where": "(the page text)",
+    "msg": "1 library source (wikimedia): the page credits wikimedia; confirm each shows the client's own product, place or people",
+    "fix": "confirm the library photograph shows the client's own product, place or people; otherwise replace it",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "nav-labels",
+    "where": "header.nav.nav--centre > div.wrap.nav__bar > a.nav__logo \"Shadowday\"",
+    "msg": "\"Shadowday\" opens a section headed \"Tech job simulator for UAE students\"",
+    "fix": "name each nav link after the heading of the section it opens",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "nav-labels",
+    "where": "div.nav__menu > div.wrap.grid > div.menu-col.span-3:nth-of-type(2) > a \"Areas14 areas in all seven emirates\"",
+    "msg": "\"Areas14 areas in all seven emirates\" opens a section headed \"Innovation shouldn't depend on location.\"",
+    "fix": "name each nav link after the heading of the section it opens",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "fade-cut",
+    "where": "div.ui-win__main > ul.ui-win__rows > li.ui-win__row:nth-of-type(9) > span.ui-win__who \"Shadowday\"",
+    "msg": "a line of div.ui.ui-panel fades out under its edge (\"Shadowday\"): drawn at a fraction of #f1f3f4 on #17181b, half-erased",
+    "fix": "fit the mock's rows inside its panel (fewer rows, a taller panel), or end the fade below the last whole row: no row half-erased",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "copy-length",
+    "where": "section#questions \"Questions from students and teachers\"",
+    "msg": "1 section over 90 words a screen outside the UI mocks (\"Questions from students \" 118); 61 words a screen across the page (487 words in 8 screens): a tech page says it in about 80 or fewer",
+    "fix": "cut every section to its heading, one line and the product UI: the UI says the rest; no second paragraph, no list of feature sentences",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "nav-current",
+    "where": "header.nav.nav--centre",
+    "msg": "the nav stays on screen with 5 links to the page's sections, but never marks the one you are in (no link changes as the page scrolls)",
+    "fix": "mark the link of the section on screen (a colour, a weight or a line under it) as the visitor scrolls",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "action-repeat",
+    "where": "header.nav.nav--centre > div.wrap.nav__bar > div.nav__actions > a.btn.btn--primary \"start your first day\"",
+    "msg": "\"start your first day\" shows 2 times on the first screen at 1440px (nav, hero): the nav's button and the hero's; nothing else on the screen may repeat it",
+    "fix": "show the action once a screen besides the nav's button: the hero's, the close's or the phone bar's, never all at once",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "hidden-content",
+    "where": "div.ui-diff__sug > div.ui-diff__ln > span.ui-diff__code > span.k:nth-of-type(2) \"for\"",
+    "msg": "with scripts switched off (a blocked or failed script) 6 lines stay hidden on screen 4, 1.5 s after load (opacity 0) inside a drawn mock: \"in\", \"range\", \"7, len(days)\": the page shows it only when a script reveals it",
+    "fix": "show the content at rest: the hidden state only under a class the script adds on its live path, never in the plain CSS (prefers-reduced-motion and a script that never runs show the finished page)",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "hidden-content",
+    "where": "div.ui.ui-panel > div.ui-diff__lines > div.ui-diff__ln:nth-of-type(3) > i:nth-of-type(2) \"15\"",
+    "msg": "with reduced motion asked for it stays hidden on screen 4, 0.7 s after it was scrolled to (transparent letters) inside a drawn mock: the page shows it only when a script reveals it",
+    "fix": "show the content at rest: the hidden state only under a class the script adds on its live path, never in the plain CSS (prefers-reduced-motion and a script that never runs show the finished page)",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "nav",
+    "where": "header.nav.nav--centre > div.wrap.nav__bar > button.nav__toggle",
+    "msg": "the nav is lopsided: its last item ends 13px inside the content's edge (366px), while its first starts on the other edge",
+    "fix": "start the nav's first item and end its last on the content's two edges",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "cut-text",
+    "where": "div.ui.ui-panel > ul.ui-checks__list > li.ui-check:nth-of-type(2) > span.ui-check__label \"Read pumps.py\"",
+    "msg": "cut 10px at the bottom by the overflow of div.wrap > div.group > div.grid > article.card.card--row:nth-of-type(1): a fragment run out through its panel's edge (and 2 more like it: \"test_daily_totals\", \"9ms\")",
+    "fix": "give the text room: no overflow clipping a line, no line past its box",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "no-visual",
+    "where": "section#startups \"Startups working on problems from Liwa t\"",
+    "msg": "pictures, effects and mocks cover 22% of this section; a feature section needs a visual (about 25% or more)",
+    "fix": "give the section a visual: a UI fragment on a ground, real icons, or a photograph that fits",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "cta",
+    "where": "section#day \"Your first day, standup to Shadow Report\"",
+    "msg": "a section over 1.5 screens long with no link or button in it",
+    "fix": "add the action: a button in the hero, one on every priced item, one in the closing section",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "text-contrast",
+    "where": "div.ui-diff__lines > div.ui-diff__thread > div.ui-diff__by > span.ui-avatar \"R\"",
+    "msg": "2 lines of text in drawn mocks read under 4.5:1 (2 colour pairs), the worst \"R\" in #5e95a7 on #344851 at 2.89:1",
+    "fix": "lift the mocks' muted text (labels, meta, initials) to 4.5:1 on their own panel, or set it larger",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "busy-ground",
+    "where": "h2#anywhere-h \"Innovation shouldn't depend on location.\"",
+    "msg": "text over a detailed part of a picture (its ground changes by 1.7 L* from one pixel to the next under the words) (inside a held section or scroll scene, whose motion --quick does not check)",
+    "fix": "move the text to a calm part of the picture, or put it on a panel",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "section-gaps",
+    "where": "main#top > section.hero.hero--collage / section#day",
+    "msg": "118px between these sections, -28% against the median 163px",
+    "fix": "use one gap between sections (all within 25% of each other)",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "section-gaps",
+    "where": "section#day / section#review",
+    "msg": "210px between these sections, +29% against the median 163px",
+    "fix": "use one gap between sections (all within 25% of each other)",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "section-gaps",
+    "where": "section#schools / section#questions",
+    "msg": "uneven space at the edge of a band: 94px outside its edge, 55px inside it (the space on either side of a change of ground reads as one gap only when the two match)",
+    "fix": "use one gap between sections (all within 25% of each other)",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "proximity",
+    "where": "section#schools > div.wrap > div.grid > div.frame.frame--photo \"Shadowday and UAE schools Since the 2025\"",
+    "msg": "stacked at this width, the visual starts 14px under the text and buttons above it (\"Shadowday and UAE schools Sinc\"): it reads glued to them (inside a held section or scroll scene, whose motion --quick does not check)",
+    "fix": "give the stacked split the section's own gap between text and visual (40px or more on a phone)",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "orphan",
+    "where": "div#sources > ul > li:nth-of-type(3) \"3 Bell et al., Quarterly Journal of Econ\"",
+    "msg": "its last line holds only \"2019\"",
+    "fix": "rebalance the text (text-wrap: pretty, or a shorter line) so the last line holds more than one short word",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "fade-cut",
+    "where": "div.ui.ui-panel > div.ui-diff__lines > div.ui-diff__ln:nth-of-type(15) > span.ui-diff__code \"with open(path) as f:\"",
+    "msg": "6 lines of div.ui.ui-panel fade out under its edge (\"with open(path) as f:\", \"with\", \"open\"): drawn at a fraction of #a3a5a7 on #17181b, half-erased",
+    "fix": "fit the mock's rows inside its panel (fewer rows, a taller panel), or end the fade below the last whole row: no row half-erased",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "empty-area",
+    "where": "footer#contact \"Your first day starts in the browser\"",
+    "msg": "37% of the section is empty: 576px of empty rows between its content, in its 1544px of rows (WARN over 35%, FAIL over 50%)",
+    "fix": "fill the section: a picture or a second column beside the words, or more of its own content; the section stays one or two screens tall (T-height)",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   }
+  ],
+  "crashed": [],
+  "seconds": {
+   "consistency": 134,
+   "layout": 5
+  }
+ },
+ "open": [],
+ "waived": [],
+ "warnCount": 30,
+ "note": "consistency.mjs gave no report (exit 1: Error: No Chrome, Edge or Chromium found; set CHROME_PATH.); check.mjs could not run (exit 2: no Chrome found (set CHROME_PATH))",
+ "errorTold": true,
+ "manual": true
+}
