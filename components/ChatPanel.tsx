@@ -79,16 +79,18 @@ export function ChatPanel() {
         })}
       </div>
 
-      <div className="flex items-start gap-3 border-b border-line px-4 py-3">
-        <Avatar person={person} size={40} />
-        <div className="min-w-0">
-          <p className="font-medium leading-tight">{l(person.name)}</p>
-          <p className="text-sm leading-snug text-muted">{l(person.role)}</p>
+      <div className="border-b border-line px-4 py-3">
+        <div className="flex items-start gap-3">
+          <Avatar person={person} size={40} />
+          <div className="min-w-0">
+            <p className="font-medium leading-tight">{l(person.name)}</p>
+            <p className="text-sm leading-snug text-muted">{l(person.role)}</p>
+          </div>
         </div>
         {channel === "stakeholder" && revealed && (
-          <span className="ms-auto inline-flex shrink-0 items-center gap-1 rounded-full bg-good/15 px-2.5 py-1 text-xs text-good">
+          <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-good/15 px-2.5 py-1 text-xs text-good">
             <Sparkles size={12} aria-hidden /> {t("revealedBadge")}
-          </span>
+          </p>
         )}
       </div>
 

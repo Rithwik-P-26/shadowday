@@ -191,3 +191,8 @@ export const useUi = create<{
   setTyping: (c, v) => set((s) => ({ typing: { ...s.typing, [c]: v } })),
   setRunning: (running) => set({ running }),
 }));
+
+// Exposed for automated end-to-end checks and the demo-video recorder. Holds only this device's own state.
+if (typeof window !== "undefined") {
+  (window as unknown as { __shadowday?: typeof useWorld }).__shadowday = useWorld;
+}

@@ -10,7 +10,7 @@ export function standupLines(lang: Lang, ctx: { name: string; area: Area; archet
   const vars = {
     name: ctx.name || (lang === "ar" ? "زميلنا الجديد" : "there"),
     company: archetype.company.name,
-    tagline: archetype.company.tagline[lang],
+    tagline: lang === "en" ? archetype.company.tagline.en.charAt(0).toLowerCase() + archetype.company.tagline.en.slice(1) : archetype.company.tagline.ar,
     area: area.name[lang],
     problem: archetype.problem[lang],
     stakeholder: archetype.stakeholder.name[lang],

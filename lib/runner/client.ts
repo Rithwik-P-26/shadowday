@@ -28,7 +28,7 @@ export function onRunnerStatus(fn: (s: typeof status) => void) {
 }
 
 function spawn() {
-  worker = new Worker("/pyodide-worker.js");
+  worker = new Worker("/pyodide-worker.mjs", { type: "module" });
   worker.onmessage = (e: MessageEvent) => {
     const { id, ok, result, error } = e.data || {};
     const p = pending.get(id);

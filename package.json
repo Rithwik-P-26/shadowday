@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "tickets": "node scripts/build-tickets.mjs",
+    "predev": "node scripts/copy-pyodide.mjs",
+    "prebuild": "node scripts/copy-pyodide.mjs && node scripts/build-tickets.mjs"
   },
   "dependencies": {
     "@codemirror/lang-python": "^6.2.1",
@@ -14,6 +19,7 @@
     "fflate": "^0.8.2",
     "lucide-react": "^0.553.0",
     "next": "16.4.6",
+    "pyodide": "^314.0.8",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "zustand": "^5.0.8"

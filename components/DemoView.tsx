@@ -77,7 +77,6 @@ export function DemoView() {
     }
     setDemo(res);
     setBusy("noting");
-    const flagged = res.series.filter((p) => p.flagged).map((p) => p.label);
     const note = await askAgent({
       agent: "manager",
       mode: "demo",
@@ -85,7 +84,7 @@ export function DemoView() {
       areaId: day.session.areaId,
       studentName: day.session.name || undefined,
       history: [],
-      demoSummary: `${res.summary.en} Flagged: ${flagged.join(", ") || "none"}. Points: ${res.series.length}.`,
+      demoSummary: res.summary[lang],
     });
     setDemoNote(note.text);
     useWorld.getState().addMessage("manager", { from: "manager", text: note.text, provider: note.provider });
