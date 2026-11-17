@@ -116,8 +116,11 @@ describe("mentor prompt", () => {
   });
 
   it("points to the stakeholder when the hidden-rule tests fail", () => {
-    const prompt = promptFor(fullRequest("mentor", "chat", "en", "water"));
+    const req = fullRequest("mentor", "chat", "en", "water");
+    const prompt = promptFor({ ...req, stats: { ...req.stats!, revealed: false } });
     expect(prompt).toMatch(/failing tests on flag_wells depend on a rule only Saeed knows/);
+    // Once the student has the rule, Ravi helps turn it into code instead of sending them back.
+    expect(promptFor(req)).toMatch(/Do not send them back to Saeed/);
   });
 
   it("gives the next hint in the ladder for the focus function", () => {

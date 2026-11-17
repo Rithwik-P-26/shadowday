@@ -103,7 +103,13 @@ async function buildVideo() {
     const fit = phone
       ? "scale=-2:980,pad=1920:1080:(ow-iw)/2:20:color=black"
       : "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=black";
-    ff(["-f", "concat", "-safe", "0", "-i", frames, "-vf", `${fit},fps=30,format=yuv420p`, "-c:v", "libx264", "-crf", "16", "-preset", "fast", raw]);
+    // ffmpeg's fps filter stretches the last frame by its own (often long) duration, so cut at the recorded length.
+    const listed = fs
+      .readFileSync(frames, "utf8")
+      .split("\n")
+      .filter((l) => l.startsWith("duration "))
+      .reduce((a, l) => a + Number(l.slice(9)), 0);
+    ff(["-f", "concat", "-safe", "0", "-i", frames, "-vf", `${fit},fps=30,format=yuv420p`, "-t", listed.toFixed(3), "-c:v", "libx264", "-crf", "16", "-preset", "fast", raw]);
     const V = dur(raw);
     const seg = path.join(segDir, `${it.id}.mp4`);
     let vf;
@@ -129,7 +135,7 @@ async function buildVideo() {
       const s = t + (acc / total) * A;
       acc += c.length;
       const e = t + (acc / total) * A;
-      captions.push({ text: c, s: +s.toFixed(3), e: +(e + 0.05).toFixed(3) });
+      captions.push({ text: c, s: +s.toFixed(3), e: +(e - 0.002).toFixed(3) });
     }
     console.log(`${it.id}: footage ${V.toFixed(1)}s -> ${T.toFixed(1)}s`);
     t += T;
@@ -181,7 +187,8 @@ async function buildVideo() {
     })
     .join("\n");
   fs.writeFileSync(path.join(OUTDIR, "shadowday-demo.srt"), srt);
-  ff(["-ss", "3", "-i", final, "-frames:v", "1", path.join(OUTDIR, "thumbnail.jpg")]);
+  // YouTube thumbnail: the landing page's share image (the real UI), cropped to 16:9.
+  ff(["-i", path.join(ROOT, "public", "share.jpg"), "-vf", "crop=iw:iw*9/16:0:0,scale=1280:720", "-q:v", "2", path.join(OUTDIR, "thumbnail.jpg")]);
   console.log(`done: ${final} (${dur(final).toFixed(1)}s)`);
 }
 

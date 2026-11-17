@@ -152,7 +152,12 @@ function mentorSection(req: AgentRequest, ticket: Ticket, archetype: Archetype, 
   lines.push(testBlock(req, ticket));
 
   const hiddenFailing = failingHiddenRuleFns(ticket, req.testSummary, [sh.name.en, sh.name.ar]);
-  if (hiddenFailing.length) {
+  if (hiddenFailing.length && req.stats?.revealed) {
+    // The student already got the rule from the customer: sending them back would sound like Ravi wasn't listening.
+    lines.push(
+      `Note: the failing tests on ${hiddenFailing.join(", ")} depend on ${sh.name.en}'s rule, and the student has already asked ${sh.name.en} and been told it (you don't know the rule yourself). Do not send them back to ${sh.name.en}. Ask one question that helps them turn what ${sh.name.en} told them into code (for example which values they need to compare, or how to look at the days before each date), without stating or guessing the rule.`,
+    );
+  } else if (hiddenFailing.length) {
     lines.push(
       `Note: the failing tests on ${hiddenFailing.join(", ")} depend on a rule only ${sh.name.en} knows. Point the student to ${sh.name.en}, for example by suggesting they ask what counts or when to flag something, without stating or guessing the rule.`,
     );

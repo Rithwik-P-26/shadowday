@@ -19,6 +19,24 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const audioDur = JSON.parse(fs.readFileSync(path.join(HERE, "tmp", "durations.json"), "utf8"));
 
+// Moments worth a still (seconds from the start of their segment), saved to video/tmp/marks.json for the screenshots.
+const recStart = {};
+const marks = {};
+const mark = (id, name) => (marks[`${id}:${name}`] = +(Date.now() / 1000 - recStart[id]).toFixed(3));
+
+/** Hide the Next.js dev-mode badge (it isn't in production builds) so it doesn't cover the chat box on video. */
+async function hideDevBadge(ctx) {
+  await ctx.addInitScript(() => {
+    const add = () => {
+      const st = document.createElement("style");
+      st.textContent = "nextjs-portal{display:none!important}";
+      document.head.appendChild(st);
+    };
+    if (document.head) add();
+    else document.addEventListener("DOMContentLoaded", add);
+  });
+}
+
 /** Start a CDP screencast on a page; returns stop() which writes frames + an ffconcat list. */
 async function startRec(page, id, { maxWidth = W, maxHeight = H } = {}) {
   const dir = path.join(OUT, id);
@@ -36,6 +54,7 @@ async function startRec(page, id, { maxWidth = W, maxHeight = H } = {}) {
   });
   await cdp.send("Page.startScreencast", { format: "jpeg", quality: 92, maxWidth, maxHeight, everyNthFrame: 1 });
   const started = Date.now() / 1000;
+  recStart[id] = started;
   return async () => {
     const ended = Date.now() / 1000;
     await cdp.send("Page.stopScreencast").catch(() => {});
@@ -49,7 +68,8 @@ async function startRec(page, id, { maxWidth = W, maxHeight = H } = {}) {
       const t1 = i + 1 < frames.length ? frames[i + 1].t : ended;
       lines.push(`file '${path.basename(frames[i].file)}'`, `duration ${Math.max(0.001, t1 - t0).toFixed(4)}`);
     }
-    lines.push(`file '${path.basename(frames[frames.length - 1].file)}'`);
+    // The repeated last entry is only a terminator; give it one frame so ffmpeg doesn't count the last duration twice.
+    lines.push(`file '${path.basename(frames[frames.length - 1].file)}'`, "duration 0.0334");
     fs.writeFileSync(path.join(dir, "list.ffconcat"), lines.join("\n") + "\n");
     console.log(`${id}: ${frames.length} frames, ${(ended - started).toFixed(1)}s (audio ${audioDur[id]?.toFixed(1)}s)`);
   };
@@ -84,6 +104,23 @@ const SOLUTION_PARTS = (() => {
   return steps;
 })();
 
+// Hessa's first guess at flag_overpumping (the ticket's naive.py): first two functions done, third guessed.
+const NAIVE_STEP = (() => {
+  const naive = fs.readFileSync(path.join(ROOT, "content/tickets/water/naive.py"), "utf8");
+  const body = naive.slice(naive.indexOf("def flag_overpumping")).split("\n").slice(1).join("\n").trimEnd();
+  const out = SOLUTION_PARTS[1].replace(/    # TODO: ask Saeed[^\n]*\n    return None/, body);
+  if (out === SOLUTION_PARTS[1]) throw new Error("naive step did not apply");
+  return out;
+})();
+
+/** Scroll the editor so the given function's def line is at the top. */
+async function showFunction(page, name) {
+  await page.evaluate((n) => {
+    const line = Array.from(document.querySelectorAll(".cm-line")).find((l) => l.textContent?.startsWith(`def ${n}(`));
+    line?.scrollIntoView({ block: "start", behavior: "smooth" });
+  }, name);
+}
+
 async function main() {
   const browser = await chromium.launch({ headless: true });
 
@@ -111,7 +148,27 @@ async function main() {
       await page.goto(CARDS + "#arch");
       await sleep(500);
       const stop = await startRec(page, "10-arch");
-      await sleep(audioDur["10-arch"] * 1000 + 400);
+      // Zoom into the part of the diagram each sentence talks about, so its small text is readable on video.
+      const T = audioDur["10-arch"] * 1000;
+      const focus = (k, cx, cy) =>
+        page.evaluate(
+          ([k, cx, cy]) => {
+            const img = document.querySelector("img.arch");
+            img.style.transformOrigin = "0 0";
+            img.style.transition = "transform 1.1s cubic-bezier(.4,0,.2,1)";
+            img.style.transform = k === 1 ? "none" : `translate(${800 - k * (cx - 160)}px, ${450 - k * (cy - 90)}px) scale(${k})`;
+          },
+          [k, cx, cy],
+        );
+      await sleep(900);
+      await focus(1.6, 847, 640); // Python in a Web Worker
+      await sleep(T * 0.37 - 900);
+      await focus(1.6, 1160, 560); // free failover chain
+      await sleep(T * 0.38);
+      await focus(1.6, 1160, 652); // no-solution guardrail
+      await sleep(T * 0.25 - 600);
+      await focus(1, 0, 0);
+      await sleep(1400);
       await stop();
     }
     if (want("11-close")) {
@@ -124,9 +181,11 @@ async function main() {
   }
 
   // ---------- desktop day (Hessa, Liwa) ----------
-  const desktopIds = ["02-intro", "03-start", "04-standup", "05-work", "06-review", "07-demo", "08-report"];
+  const desktopIds = ["02-intro", "03-start", "04-standup", "05a-ticket", "05b-saeed", "05c-ravi", "05d-pass", "06-review", "07-demo", "08-report"];
   if (desktopIds.some(want)) {
-    const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
+    // A 1440x810 laptop layout at 4/3 pixel density: frames are still 1920x1080, but the UI reads larger on video.
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 810 }, deviceScaleFactor: 4 / 3 });
+    await hideDevBadge(ctx);
     const page = await ctx.newPage();
     await page.goto(BASE + "/start");
     await page.evaluate(() => localStorage.clear());
@@ -151,14 +210,14 @@ async function main() {
     await sleep(800);
     {
       const stop = await startRec(page, "03-start");
-      await sleep(1600);
+      await sleep(2600);
       await page.getByText("Liwa", { exact: true }).click();
-      await sleep(900);
-      await typeSlow(page.getByLabel(/Your first name/), "Hessa", 110);
-      await sleep(700);
+      await sleep(2000);
+      await typeSlow(page.getByLabel(/Your first name/), "Hessa", 140);
+      await sleep(1800);
       await page.getByRole("button", { name: /Start the day at Falaj Labs/ }).click();
       await page.waitForURL(/\/day/);
-      await sleep(1500);
+      await sleep(2200);
       await stop();
     }
 
@@ -173,52 +232,86 @@ async function main() {
       await stop();
     }
 
-    // 05: the work
+    // 05a: the ticket, a guess at the third function, and the failing run that says "ask"
     {
-      const stop = await startRec(page, "05-work");
+      const stop = await startRec(page, "05a-ticket");
+      await sleep(2600);
+      await page.evaluate((code) => window.__shadowday.getState().setCode(code), NAIVE_STEP);
+      await sleep(300);
+      await showFunction(page, "flag_overpumping");
+      await sleep(2600);
       await page.getByRole("button", { name: /^Run tests/ }).click();
-      await page.getByText(/of 12 passing/).waitFor({ timeout: 60000 });
-      await sleep(1800);
+      await page.getByText(/of 12 passing/).first().waitFor({ timeout: 60000 });
+      await sleep(1600);
+      // Bring the hidden-rule failure ("... Ask him.") into view in the test list.
+      await page.getByText(/Ask him\./).first().evaluate((el) => el.scrollIntoView({ block: "center", behavior: "smooth" }));
+      await sleep(Math.max(3500, audioDur["05a-ticket"] * 1000 - 8800));
+      await stop();
+    }
+
+    // 05b: ask the customer
+    {
+      const stop = await startRec(page, "05b-saeed");
+      await sleep(500);
       const box = page.getByRole("textbox", { name: /Message Saeed/ });
-      await typeSlow(box, "What counts as over-pumping for your wells?", 35);
+      await typeSlow(box, "What counts as over-pumping for your wells?", 30);
       await box.press("Enter");
-      await page.getByText(/You found the hidden requirement/).waitFor({ timeout: 30000 });
-      await sleep(3500);
+      await page.getByText(/You found the hidden requirement/).first().waitFor({ timeout: 30000 });
+      await sleep(4500);
+      await stop();
+    }
+
+    // 05c: ask the mentor for the answer
+    {
+      const stop = await startRec(page, "05c-ravi");
       await page.getByRole("tab", { name: /Ravi/ }).click();
-      await sleep(600);
+      await sleep(500);
       const box2 = page.getByRole("textbox", { name: /Message Ravi/ });
-      await typeSlow(box2, "Can you just give me the code for flag_overpumping?", 35);
+      await typeSlow(box2, "Can you just give me the code for flag_overpumping?", 30);
+      const before = await page.evaluate(() => window.__shadowday.getState().chats.mentor.length);
       await box2.press("Enter");
-      await page.waitForFunction(() => document.querySelectorAll('[aria-live] .msg-in, [role="log"] .msg-in').length > 0, null, { timeout: 30000 }).catch(() => {});
-      await sleep(4200);
-      for (const step of SOLUTION_PARTS) {
-        await page.evaluate((code) => window.__shadowday.getState().setCode(code), step);
-        await sleep(1100);
-      }
+      await page.waitForFunction((n) => window.__shadowday.getState().chats.mentor.length >= n + 2, before, { timeout: 30000 });
+      await sleep(4800);
+      await stop();
+    }
+
+    // 05d: fix the function with the rule and run the tests again
+    {
+      const stop = await startRec(page, "05d-pass");
+      await sleep(600);
+      await page.evaluate((code) => window.__shadowday.getState().setCode(code), SOLUTION_PARTS[2]);
+      // CodeMirror redraws after the new document lands; scroll again once it has.
+      await sleep(500);
+      await showFunction(page, "flag_overpumping");
+      await sleep(500);
+      await showFunction(page, "flag_overpumping");
+      await sleep(1700);
       await page.getByRole("button", { name: /^Run tests/ }).click();
       await page.getByText(/All tests pass/).first().waitFor({ timeout: 60000 });
-      await sleep(2200);
+      await sleep(2600);
       await stop();
     }
 
     // 06: pull request review
     {
       const stop = await startRec(page, "06-review");
+      await sleep(700);
       await page.getByRole("button", { name: /Open pull request/ }).click();
-      await page.getByText(/^Approved$/).waitFor({ timeout: 60000 });
-      await sleep(3200);
+      await page.getByText(/^Approved$/).first().waitFor({ timeout: 60000 });
+      await sleep(4600);
       await stop();
     }
 
     // 07: demo
     {
       const stop = await startRec(page, "07-demo");
+      await sleep(500);
       await page.getByRole("button", { name: /Merge and demo it/ }).click();
       await sleep(700);
       await page.getByRole("button", { name: /Run it on the full dataset/ }).click();
       await page.locator("svg[role=img]").first().waitFor({ timeout: 60000 });
       await page.getByRole("button", { name: /Wrap up the day/ }).waitFor({ timeout: 60000 });
-      await sleep(2500);
+      await sleep(3200);
       await stop();
     }
 
@@ -227,7 +320,9 @@ async function main() {
       const stop = await startRec(page, "08-report");
       await page.getByRole("button", { name: /Wrap up the day/ }).click();
       await page.waitForURL(/\/report/, { timeout: 60000 });
-      await sleep(2600);
+      await sleep(2400);
+      mark("08-report", "top");
+      await sleep(200);
       await page.mouse.wheel(0, 420);
       await sleep(2200);
       await page.mouse.wheel(0, 420);
@@ -247,6 +342,7 @@ async function main() {
       userAgent:
         "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1",
     });
+    await hideDevBadge(ctx);
     const page = await ctx.newPage();
     await page.goto(BASE + "/start");
     await page.evaluate(() => localStorage.clear());
@@ -267,13 +363,16 @@ async function main() {
     const box = page.getByRole("textbox", { name: /اكتب رسالة إلى خالد/ });
     await typeSlow(box, "متى يجب أن نغلق طريق الوادي؟", 60);
     await box.press("Enter");
-    await page.getByText(/اكتشفت المتطلب المخفي/).waitFor({ timeout: 30000 });
+    await page.getByText(/اكتشفت المتطلب المخفي/).first().waitFor({ timeout: 30000 });
     await sleep(3800);
     await stop();
     await ctx.close();
   }
 
   await browser.close();
+  const mf = path.join(HERE, "tmp", "marks.json");
+  const prev = fs.existsSync(mf) ? JSON.parse(fs.readFileSync(mf, "utf8")) : {};
+  fs.writeFileSync(mf, JSON.stringify({ ...prev, ...marks }, null, 2));
 }
 
 main().catch((e) => {

@@ -58,7 +58,11 @@ export default function ReportPage() {
   const skills = [
     { done: w.revealed, label: t("skillAsk") },
     { done: w.runs.length > 0, label: w.runs.length > 0 ? `${t("skillTest")} (${count("runs", w.runs.length)})` : t("skillTest") },
-    { done: w.hintsUsed > 0, label: w.hintsUsed > 0 ? `${t("skillHelp")} (${count("hints", w.hintsUsed)})` : t("skillHelp") },
+    // Messaging Ravi counts as asking for help, not only the hint button.
+    {
+      done: w.hintsUsed > 0 || w.chats.mentor.some((m) => m.from === "student"),
+      label: w.hintsUsed > 0 ? `${t("skillHelp")} (${count("hints", w.hintsUsed)})` : t("skillHelp"),
+    },
     { done: w.merged, label: t("skillShip") },
     { done: !!w.demo, label: t("skillData") },
   ];

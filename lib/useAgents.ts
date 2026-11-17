@@ -6,6 +6,13 @@ import type { AgentId, AgentRequest } from "@/lib/types";
 import { isGreenNow, testSummary, useDay } from "@/lib/useDay";
 import { useUi, useWorld } from "@/lib/world/store";
 
+/** What the coworkers may know about the day so far (Ravi uses `revealed` to stop sending the student back to the customer). */
+function dayStats(): AgentRequest["stats"] {
+  const w = useWorld.getState();
+  const minutes = w.session ? Math.max(0, Math.round((Date.now() - w.session.startedAt) / 60_000)) : 0;
+  return { testRuns: w.runs.length, questionsAsked: w.questionsAsked, hintsUsed: w.hintsUsed, revealed: w.revealed, minutes };
+}
+
 /** Sends messages to the AI coworkers and writes their replies into the world state. */
 export function useAgents() {
   const day = useDay();
@@ -48,6 +55,7 @@ export function useAgents() {
         history: past,
         code: channel === "mentor" ? w.code : undefined,
         testSummary: channel === "mentor" ? testSummary() : undefined,
+        stats: channel === "mentor" ? dayStats() : undefined,
       });
       useUi.getState().setTyping(channel, false);
       deliver(channel, res.text, res.provider);
@@ -78,6 +86,7 @@ export function useAgents() {
         history: past,
         code: w.code,
         testSummary: testSummary(),
+        stats: dayStats(),
       });
       useUi.getState().setTyping("mentor", false);
       deliver("mentor", res.text, res.provider);

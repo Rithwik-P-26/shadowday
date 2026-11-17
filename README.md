@@ -11,6 +11,13 @@ Built solo for [Bridge The Gap Hacks](https://sq-hacks.devpost.com) (Nov 15–20
 
 ![How Shadowday works](docs/architecture.svg)
 
+| | |
+|---|---|
+| ![The tests fail and say to ask the customer](docs/screenshots/03-tests-say-ask-the-customer.jpg) | ![Saeed explains the rule nobody wrote down](docs/screenshots/04-customer-reveals-the-rule.jpg) |
+| ![Ravi reviews the pull request](docs/screenshots/07-pull-request-review.jpg) | ![The Shadow Report](docs/screenshots/09-shadow-report.jpg) |
+
+<p align="center"><img src="docs/screenshots/10-phone-arabic.jpg" alt="Ahmed in Dibba, on a phone, in Arabic" width="300"></p>
+
 ## Why
 
 - Since the 2025–26 school year, AI has been a required subject in every UAE public school, from kindergarten to Grade 12 ([WAM](https://www.wam.ae/en/article/15qfeob-national-identity-shape-uae’s-2025–2026-academic)).
@@ -55,9 +62,19 @@ Free keys: [console.groq.com/keys](https://console.groq.com/keys) and [aistudio.
 ## Tests
 
 ```bash
-npm test                          # unit tests: failover, guardrails, prompts, scripted replies, route
+npm test                          # 240 unit tests: failover, guardrails, prompts, reveal detection, scripted replies, route
 python3 -I scripts/check-tickets.py   # ticket integrity
 npx playwright test               # end-to-end on desktop Chromium, Pixel 7 and iPhone 15 (needs the dev server)
+```
+
+## Demo video
+
+The video is generated from the real app: `video/record.mjs` drives the day in headless Chrome with the live AI coworkers and records it with Chrome's screencast, and `video/build.mjs` adds the narration (macOS `say`), burned-in captions and the title cards with ffmpeg.
+
+```bash
+node video/build.mjs audio     # narration from video/narration.json
+node video/record.mjs          # footage (needs the dev server on :3000)
+node video/build.mjs video     # demo/shadowday-demo.mp4 + .srt
 ```
 
 ## Project map

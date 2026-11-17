@@ -558,6 +558,17 @@ const MENTOR_LINES = {
     en: ["One more thing: a test on {hfn} checks a rule that isn't written in the ticket. Ask {stakeholder} about it."],
     ar: ["شيء آخر: أحد اختبارات {hfn} يتحقق من قاعدة غير مكتوبة في المهمة. اسأل {stakeholder} عنها."],
   },
+  // The student already has the rule from the customer: help them turn it into code instead.
+  hiddenKnown: {
+    en: [
+      "You already have {stakeholder}'s rule for {hfn}. Read it again slowly: which numbers does it compare, and which of them does your code already have?",
+      "{stakeholder} told you the rule for {hfn}. Say it in your own words as one if statement in plain English first. What goes on each side of the comparison?",
+    ],
+    ar: [
+      "لديك قاعدة {stakeholder} الخاصة بـ {hfn}. اقرأها مرة أخرى ببطء: ما الأرقام التي تقارن بينها، وأيّها موجود في كودك بالفعل؟",
+      "صار لديك الآن قاعدة {stakeholder} الخاصة بـ {hfn}. صُغها أولاً بكلماتك كجملة شرطية واحدة: ماذا يكون على كل جانب من المقارنة؟",
+    ],
+  },
   hintIntro: [
     { en: ["Here's a nudge for {fn}."], ar: ["إليك تلميحاً صغيراً بخصوص {fn}."] },
     { en: ["Let's go one step deeper on {fn}."], ar: ["لنتعمق خطوة أخرى في {fn}."] },
@@ -668,7 +679,8 @@ function mentorChat(req: AgentRequest, ctx: ScriptedContext): AgentResponse {
 
   const allGreen = isApproved(req.testSummary);
   const hidden = failingHiddenRuleFns(ctx.ticket, req.testSummary, stakeholderNames(ctx));
-  const pointer = hidden.length ? ` ${say(MENTOR_LINES.hiddenPointer, lang, seed, { ...vars, hfn: hidden[0] })}` : "";
+  const known = req.stats?.revealed === true;
+  const pointer = hidden.length ? ` ${say(known ? MENTOR_LINES.hiddenKnown : MENTOR_LINES.hiddenPointer, lang, seed, { ...vars, hfn: hidden[0] })}` : "";
 
   // The file doesn't load, so there are no failing tests to talk about: talk about the error instead.
   const loadError = req.testSummary?.error;
@@ -708,7 +720,8 @@ function mentorHint(req: AgentRequest, ctx: ScriptedContext): AgentResponse {
 
   const hidden = failingHiddenRuleFns(ctx.ticket, req.testSummary, stakeholderNames(ctx));
   const hintMentionsStakeholder = stakeholderNames(ctx).some((n) => normalizeForMatch(hintText).includes(normalizeForMatch(n)));
-  if (hidden.includes(fn) && !hintMentionsStakeholder) parts.push(say(MENTOR_LINES.hiddenPointer, lang, seed, { ...vars, hfn: fn }));
+  if (hidden.includes(fn) && !hintMentionsStakeholder)
+    parts.push(say(req.stats?.revealed === true ? MENTOR_LINES.hiddenKnown : MENTOR_LINES.hiddenPointer, lang, seed, { ...vars, hfn: fn }));
   // Level-3 hints are often a numbered list of steps: keep them on their own lines.
   return { text: parts.join(hintText.includes("\n") ? "\n" : " "), provider: "scripted" };
 }
