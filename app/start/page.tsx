@@ -37,9 +37,22 @@ export default function StartPage() {
 
   const begin = () => {
     if (!chosen) return;
+    // Starting over wipes the current day (code, chats, report): make sure that's what the student wants.
+    if (session && !window.confirm(t("newDayConfirm"))) return;
     start(name, chosen.id, getTicket(chosen.archetype).starter);
     router.push("/day");
   };
+
+  // The saved language is only known after hydration: render nothing language-dependent before that,
+  // so Arabic users never see the English, left-to-right page flash first.
+  if (!hydrated)
+    return (
+      <main className="min-h-dvh bg-bg">
+        <header className="mx-auto flex h-16 max-w-6xl items-center px-4 lg:px-8">
+          <Wordmark />
+        </header>
+      </main>
+    );
 
   return (
     <main className="min-h-dvh">
@@ -49,13 +62,13 @@ export default function StartPage() {
       </header>
 
       <div className="mx-auto max-w-6xl px-4 pt-6 pb-40 lg:px-8 lg:pt-10">
-        {hydrated && session && !finishedAt && (
+        {session && (
           <div className="mb-8 flex flex-col gap-3 rounded-[18px] border border-line bg-surface p-4 sm:flex-row sm:items-center">
             <p className="flex-1 text-[15px]">
               {ARCHETYPES[getArea(session.areaId).archetype].company.name} · {l(getArea(session.areaId).name)}
             </p>
-            <button type="button" className="btn btn-primary" onClick={() => router.push("/day")}>
-              {t("resume")} <ArrowRight size={16} aria-hidden className="rtl:-scale-x-100" />
+            <button type="button" className="btn btn-primary" onClick={() => router.push(finishedAt ? "/report" : "/day")}>
+              {finishedAt ? t("viewReport") : t("resume")} <ArrowRight size={16} aria-hidden className="rtl:-scale-x-100" />
             </button>
           </div>
         )}
@@ -79,7 +92,7 @@ export default function StartPage() {
                     return (
                       <label
                         key={area.id}
-                        className={`flex min-h-[56px] cursor-pointer items-center gap-3 rounded-[16px] border px-4 py-3 transition-[transform,background-color,border-color] duration-150 hover:-translate-y-0.5 ${
+                        className={`flex min-h-[56px] cursor-pointer items-center gap-3 rounded-[16px] border px-4 py-3 transition-[transform,background-color,border-color] duration-150 hover:-translate-y-0.5 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent ${
                           active ? "border-accent bg-accent/10" : "border-line bg-surface hover:border-line-strong"
                         }`}
                       >
@@ -98,11 +111,7 @@ export default function StartPage() {
             );
           })}
         </div>
-        <p className="mt-4 text-sm text-muted">
-          {lang === "ar"
-            ? "المسافة بخط مستقيم إلى أقرب مركز للشركات الناشئة: مدينة دبي للإنترنت أو هب71 في أبوظبي."
-            : "Straight-line distance to the nearest startup hub: Dubai Internet City or Hub71 in Abu Dhabi."}
-        </p>
+        <p className="mt-4 text-sm text-muted">{t("distanceNote")}</p>
       </div>
 
       <div className="fixed inset-x-0 bottom-0 border-t border-line bg-bg/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">

@@ -53,6 +53,9 @@ for (const id of IDS) {
   for (const field of REQUIRED_META) {
     if (meta[field] === undefined) fail(`content/tickets/${id}/ticket.json is missing "${field}"`);
   }
+  if (!Array.isArray(meta.conceptTags) || !meta.conceptTags.every((c) => typeof c?.en === "string" && typeof c?.ar === "string")) {
+    fail(`content/tickets/${id}/ticket.json: every conceptTags entry needs "en" and "ar"`);
+  }
 
   // Key order follows the Ticket interface in lib/types.ts.
   tickets[id] = {

@@ -71,12 +71,12 @@ export function TestPanel() {
                   {rs.map((r) => (
                     <li key={r.name} className="flex gap-2 text-sm">
                       {r.passed ? (
-                        <CircleCheck size={16} className="mt-0.5 shrink-0 text-good" aria-label="passed" />
+                        <CircleCheck size={16} className="mt-0.5 shrink-0 text-good" role="img" aria-label={t("testPassed")} />
                       ) : (
-                        <CircleX size={16} className="mt-0.5 shrink-0 text-bad" aria-label="failed" />
+                        <CircleX size={16} className="mt-0.5 shrink-0 text-bad" role="img" aria-label={t("testFailed")} />
                       )}
-                      <div className="min-w-0">
-                        <p className="code-ltr font-mono text-[13px] text-muted">{r.name}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="code-ltr font-mono text-[13px] text-muted [overflow-wrap:anywhere]">{r.name}</p>
                         {!r.passed && r.message && <p className="code-ltr mt-0.5 text-[14px] leading-snug text-ink/90">{r.message}</p>}
                       </div>
                     </li>

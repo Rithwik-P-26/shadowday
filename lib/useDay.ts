@@ -18,15 +18,25 @@ export function useDay() {
   }, [session]);
 }
 
-/** Summary of the latest test run in the shape the agent API expects. */
-export function testSummary(): AgentRequest["testSummary"] {
-  const run = useWorld.getState().lastRun;
+type Summary = NonNullable<AgentRequest["testSummary"]> & { error?: { type: string; message: string; line?: number } };
+
+/**
+ * Summary of the latest test run in the shape the agent API expects.
+ * With `fresh`, it is only returned when that run used the code that is in the editor now
+ * (the PR review must never approve code that was edited after the last green run).
+ */
+export function testSummary(opts: { fresh?: boolean } = {}): AgentRequest["testSummary"] {
+  const { lastRun: run, lastRunCode, code } = useWorld.getState();
   if (!run) return undefined;
-  return {
+  if (opts.fresh && lastRunCode !== code) return undefined;
+  const summary: Summary = {
     passed: run.results.filter((r) => r.passed).length,
     total: run.results.length,
     failing: run.results.filter((r) => !r.passed).map((r) => ({ name: r.name, fn: r.fn, message: r.message })),
   };
+  // A file that doesn't load (e.g. IndentationError) has no results; pass the error on so Ravi can talk about it.
+  if (run.error) summary.error = { type: run.error.type, message: run.error.message.slice(0, 300), line: run.error.line };
+  return summary;
 }
 
 /** Status per student function from the latest run: true = all its tests pass. */

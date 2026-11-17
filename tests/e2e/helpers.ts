@@ -33,9 +33,11 @@ export const L = {
     revealed: "You found the hidden requirement",
     askRavi: /Ask Ravi about/,
     openPrDesktop: "Open pull request",
+    prShort: "PR",
+    codeChanged: "You changed the code after the last run. Run the tests again to open a pull request.",
     approved: "Approved",
     merge: "Merge and demo it",
-    runDemo: "Run it on the real data",
+    runDemo: "Run it on the full dataset",
     wrapUp: "Wrap up the day",
     download: "Download your project (.zip)",
     reportTitle: "Shadow Report",
@@ -44,6 +46,11 @@ export const L = {
     mentor: "Ravi",
     stakeholder: { water: "Saeed", floods: "Khalid", heat: "Fatima" } as Record<TicketId, string>,
     askAnswer: "just give me the answer",
+    retry: "Try again",
+    backToCode: "Back to the code",
+    demoFailed: "The demo hit an error",
+    reachFailed: (name: string) => `Couldn't reach ${name}.`,
+    manager: "Mariam",
   },
   ar: {
     begin: /^ابدأ يومك في /,
@@ -56,9 +63,11 @@ export const L = {
     revealed: "اكتشفت المتطلب المخفي",
     askRavi: /اسأل رافي عن/,
     openPrDesktop: "افتح طلب الدمج",
+    prShort: "طلب الدمج",
+    codeChanged: "عدّلت الكود بعد آخر تشغيل. شغّل الاختبارات مرة أخرى لتفتح طلب الدمج.",
     approved: "تمت الموافقة",
     merge: "ادمج واعرض النتيجة",
-    runDemo: "شغّله على البيانات الحقيقية",
+    runDemo: "شغّله على البيانات الكاملة",
     wrapUp: "اختم اليوم",
     download: "نزّل مشروعك (zip.)",
     reportTitle: "تقرير اليوم",
@@ -67,6 +76,11 @@ export const L = {
     mentor: "رافي",
     stakeholder: { water: "سعيد", floods: "خالد", heat: "فاطمة" } as Record<TicketId, string>,
     askAnswer: "أعطني الحل فقط",
+    retry: "حاول مرة أخرى",
+    backToCode: "عُد إلى الكود",
+    demoFailed: "واجه العرض خطأً",
+    reachFailed: (name: string) => `تعذّر الوصول إلى ${name}.`,
+    manager: "مريم",
   },
 } as const;
 
@@ -88,20 +102,24 @@ export const test = base.extend<{
   problems: Problems;
   shot: (step: string) => Promise<void>;
 }>({
-  problems: async ({ page }, use, testInfo) => {
+  // The fixture callback is named `provide` (not Playwright's usual `use`) so the React hooks lint rule leaves it alone.
+  problems: async ({ page }, provide, testInfo) => {
     const problems: Problems = { console: [], page: [] };
     page.on("console", (msg) => {
+      // WebKit (Safari) reports viewport keys it doesn't support as console errors. app/layout.tsx sets
+      // interactive-widget=resizes-content for Chrome on Android; Safari ignores it. Not an app error.
+      if (msg.type() === "error" && /^Viewport argument key "interactive-widget" not recognized/.test(msg.text())) return;
       if (msg.type() === "error") problems.console.push(`${msg.text()} @ ${msg.location().url}:${msg.location().lineNumber}`);
     });
     page.on("pageerror", (err) => problems.page.push(`${err.name}: ${err.message}`));
-    await use(problems);
+    await provide(problems);
     await testInfo.attach("console-errors", { body: JSON.stringify(problems, null, 2), contentType: "application/json" });
     expect(problems.page, "uncaught page errors").toEqual([]);
     expect(problems.console, "console errors").toEqual([]);
   },
-  shot: async ({ page }, use, testInfo) => {
+  shot: async ({ page }, provide, testInfo) => {
     let n = 0;
-    await use(async (step: string) => {
+    await provide(async (step: string) => {
       n += 1;
       await checkOverflow(page, `${testInfo.title} / ${step}`);
       await checkUniqueIds(page, `${testInfo.title} / ${step}`);
@@ -175,6 +193,14 @@ export async function injectSolution(page: Page, id: TicketId) {
   await page.evaluate((code) => {
     (window as unknown as { __shadowday: { getState: () => { setCode: (c: string) => void } } }).__shadowday.getState().setCode(code);
   }, src);
+}
+
+/** Appends text to the editor's code through the store, as if the student kept typing after a run. */
+export async function appendToCode(page: Page, text: string) {
+  await page.evaluate((extra) => {
+    const s = (window as unknown as { __shadowday: { getState: () => { code: string; setCode: (c: string) => void } } }).__shadowday.getState();
+    s.setCode(s.code + extra);
+  }, text);
 }
 
 /**

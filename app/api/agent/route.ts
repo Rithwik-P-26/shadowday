@@ -11,6 +11,18 @@ export const maxDuration = 60;
 
 const MAX_BODY_CHARS = 100_000;
 
+/**
+ * Test hook: a request with the header "x-shadowday-scripted: 1" skips the LLMs and gets the scripted reply
+ * (lib/llm/scripted.ts). The automated e2e suite sends it so replies are deterministic and it doesn't burn the
+ * free Groq/Gemini quota. It doesn't count against the rate limit, since no LLM is called. Harmless if a
+ * student sends it: they just get the scripted characters.
+ */
+export const SCRIPTED_HEADER = "x-shadowday-scripted";
+
+function wantsScripted(request: Request): boolean {
+  return request.headers.get(SCRIPTED_HEADER)?.trim() === "1";
+}
+
 function badRequest(error: string): Response {
   return Response.json({ error }, { status: 400, headers: { "Cache-Control": "no-store" } });
 }
@@ -37,7 +49,8 @@ export async function POST(request: Request): Promise<Response> {
   const parsed = parseAgentRequest(body);
   if (!parsed.ok) return badRequest(parsed.error);
 
-  const { allowed } = rateLimit(clientIp(request.headers));
-  const reply = await runAgent(parsed.value, { skipLlm: !allowed });
+  const scripted = wantsScripted(request);
+  const allowed = scripted || rateLimit(clientIp(request.headers)).allowed;
+  const reply = await runAgent(parsed.value, { skipLlm: scripted || !allowed });
   return Response.json(reply, { headers: { "Cache-Control": "no-store" } });
 }

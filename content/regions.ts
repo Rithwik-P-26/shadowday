@@ -49,6 +49,7 @@ export const MANAGER: Character = {
   role: { en: "Engineering manager", ar: "مديرة الهندسة" },
   initials: "M",
   color: "#93f1f7",
+  gender: "f",
   bio: {
     en: "Runs the morning standup, assigns tickets and reviews what shipped at the end of the day. Started as a junior engineer herself.",
     ar: "تدير اجتماع الصباح وتوزّع المهام وتراجع ما تم إنجازه في نهاية اليوم. بدأت مسيرتها مهندسة مبتدئة.",
@@ -61,6 +62,7 @@ export const MENTOR: Character = {
   role: { en: "Senior engineer", ar: "مهندس أول" },
   initials: "R",
   color: "#f5c26b",
+  gender: "m",
   bio: {
     en: "Reviews every pull request. Answers questions with questions, and never writes your code for you.",
     ar: "يراجع كل طلب دمج. يجيب عن الأسئلة بأسئلة، ولا يكتب الكود بدلاً منك أبداً.",
@@ -88,9 +90,10 @@ export const ARCHETYPES: Record<ArchetypeId, Archetype> = {
       role: { en: "Date farm owner, Falaj Labs' first customer", ar: "صاحب مزرعة نخيل، أول عميل لدى فلج لابز" },
       initials: "S",
       color: "#9ae187",
+      gender: "m",
       bio: {
         en: "Has farmed dates for thirty years. Knows exactly when a well is being pushed too hard, but explains it in farmer's terms, not engineer's.",
-        ar: "يزرع النخيل منذ ثلاثين عاماً. يعرف تماماً متى يُرهَق البئر، لكنه يشرح ذلك بلغة المزارع لا بلغة المهندس.",
+        ar: "يزرع النخيل منذ ثلاثين عاماً. يعرف تماماً متى تُرهَق البئر، لكنه يشرح ذلك بلغة المزارع لا بلغة المهندس.",
       },
     },
   },
@@ -106,7 +109,7 @@ export const ARCHETYPES: Record<ArchetypeId, Archetype> = {
     },
     problem: {
       en: "Flash floods can fill a dry wadi within an hour, and roads that cross wadis in the eastern mountains become dangerous fast. In April 2024 the UAE saw some of the heaviest rain in its recorded history.",
-      ar: "يمكن للسيول أن تملأ وادياً جافاً خلال ساعة، وتصبح الطرق التي تعبر الأودية في الجبال الشرقية خطرة بسرعة. وفي أبريل 2024 شهدت الإمارات من أغزر الأمطار في تاريخها المسجّل.",
+      ar: "يمكن للسيول أن تملأ وادياً جافاً خلال ساعة، وتصبح الطرق التي تعبر الأودية في الجبال الشرقية خطرة بسرعة. وفي أبريل 2024 شهدت الإمارات بعضاً من أغزر الأمطار في تاريخها المسجّل.",
     },
     stakeholder: {
       id: "stakeholder",
@@ -114,6 +117,7 @@ export const ARCHETYPES: Record<ArchetypeId, Archetype> = {
       role: { en: "Roads coordinator for the town, WadiWatch's customer", ar: "منسّق الطرق في البلدة، عميل وادي ووتش" },
       initials: "K",
       color: "#8ab4ff",
+      gender: "m",
       bio: {
         en: "Decides which roads close during storms. Cares about one thing: nobody drives into a flooded wadi.",
         ar: "يقرّر أي الطرق تُغلق أثناء العواصف. يهتم بأمر واحد: ألا يقود أحد سيارته إلى وادٍ غمرته المياه.",
@@ -140,6 +144,7 @@ export const ARCHETYPES: Record<ArchetypeId, Archetype> = {
       role: { en: "Site safety officer, Barid Labs' customer", ar: "مسؤولة السلامة في الموقع، عميلة باريد لابز" },
       initials: "F",
       color: "#ff9e80",
+      gender: "f",
       bio: {
         en: "Responsible for two hundred workers on a construction site. Knows the safety rules by heart and will not bend them.",
         ar: "مسؤولة عن مئتي عامل في موقع بناء. تحفظ قواعد السلامة عن ظهر قلب ولا تتهاون فيها.",

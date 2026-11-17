@@ -9,11 +9,11 @@ vi.mock("@/content/tickets", async () => {
   return { getTicket: f.getFixtureTicket, TICKETS: f.FIXTURE_TICKETS };
 });
 
-function post(body: unknown, ip = "203.0.113.7") {
+function post(body: unknown, ip = "203.0.113.7", extraHeaders: Record<string, string> = {}) {
   return POST(
     new Request("http://localhost/api/agent", {
       method: "POST",
-      headers: { "content-type": "application/json", "x-forwarded-for": `${ip}, 10.0.0.1` },
+      headers: { "content-type": "application/json", "x-forwarded-for": `${ip}, 10.0.0.1`, ...extraHeaders },
       body: typeof body === "string" ? body : JSON.stringify(body),
     }),
   );
@@ -95,6 +95,24 @@ describe("POST /api/agent", () => {
 
     const otherIp = await (await post({ ...valid, agent: "manager", message: "hi" }, "198.51.100.1")).json();
     expect(otherIp.provider).toBe("groq");
+  });
+});
+
+describe("x-shadowday-scripted header", () => {
+  it("serves the scripted reply without calling an LLM or using up the rate limit", async () => {
+    vi.stubEnv("GROQ_API_KEY", "gsk_test");
+    const fetchFn = vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: "From Groq." } }] }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchFn);
+
+    for (let i = 0; i < RATE_LIMIT + 5; i++) {
+      const data = await (await post({ ...valid, agent: "manager", message: "hi" }, "198.51.100.9", { "x-shadowday-scripted": "1" })).json();
+      expect(data.provider).toBe("scripted");
+    }
+    expect(fetchFn).not.toHaveBeenCalled();
+    const normal = await (await post({ ...valid, agent: "manager", message: "hi" }, "198.51.100.9")).json();
+    expect(normal.provider).toBe("groq");
+    const off = await (await post({ ...valid, agent: "manager", message: "hi" }, "198.51.100.9", { "x-shadowday-scripted": "0" })).json();
+    expect(off.provider).toBe("groq");
   });
 });
 

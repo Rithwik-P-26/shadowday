@@ -34,7 +34,7 @@ export default function ReportPage() {
   const hydrated = useHydrated();
   const router = useRouter();
   const day = useDay();
-  const { t, l, lang } = useT();
+  const { t, l, lang, count } = useT();
   const w = useWorld();
 
   if (!hydrated) return <div className="h-dvh bg-bg" />;
@@ -57,8 +57,8 @@ export default function ReportPage() {
 
   const skills = [
     { done: w.revealed, label: t("skillAsk") },
-    { done: w.runs.length > 0, label: t("skillTest", { n: w.runs.length }) },
-    { done: w.hintsUsed > 0, label: t("skillHelp", { n: w.hintsUsed }) },
+    { done: w.runs.length > 0, label: w.runs.length > 0 ? `${t("skillTest")} (${count("runs", w.runs.length)})` : t("skillTest") },
+    { done: w.hintsUsed > 0, label: w.hintsUsed > 0 ? `${t("skillHelp")} (${count("hints", w.hintsUsed)})` : t("skillHelp") },
     { done: w.merged, label: t("skillShip") },
     { done: !!w.demo, label: t("skillData") },
   ];
@@ -80,7 +80,7 @@ ${w.revealed ? `## The requirement I had to ask for\nThe ticket didn't say exact
 ## Result
 - Tests: ${last ? `${last.passed}/${last.total} passing` : "not run"} after ${w.runs.length} test runs
 - Pull request reviewed by a senior engineer and ${w.merged ? "merged" : "not merged"}
-${w.demo ? `- On the real data: ${w.demo.summary.en}` : ""}
+${w.demo ? `- On the full dataset: ${w.demo.summary.en}` : ""}
 
 ## Run it
 \`\`\`
@@ -113,13 +113,15 @@ The data in \`${ticket.data.fileName}\` is realistic but made up for this exerci
 
       <div className="mx-auto max-w-5xl px-4 pt-6 pb-20 lg:px-8 lg:pt-10">
         <p className="font-mono text-sm text-accent">{t("reportTitle")}</p>
-        <h1 className="mt-3 text-[38px] leading-[1.02] font-normal tracking-[-0.04em] sm:text-6xl">{name}</h1>
+        <h1 className="mt-3 text-[38px] leading-[1.02] font-normal tracking-[-0.04em] [overflow-wrap:anywhere] sm:text-6xl">{name}</h1>
+        {/* Each part is isolated so a Latin company name can't pull the Arabic date's numbers out of place. */}
         <p className="mt-3 text-lg text-muted">
-          {t("reportFor", { name: l(area.name), area: l(area.emirate), company: archetype.company.name })} · {date} · {t("minutes", { n: minutes })}
+          <bdi>{l(area.name)}</bdi> · <bdi>{l(area.emirate)}</bdi> · <bdi>{archetype.company.name}</bdi> · <bdi className="whitespace-nowrap">{date}</bdi> ·{" "}
+          <bdi>{count("minutes", minutes)}</bdi>
         </p>
 
-        <div className="mt-10 grid gap-4 lg:grid-cols-2">
-          <section className="print-card rounded-[24px] border border-line bg-surface p-5 lg:p-6">
+        <div className="mt-10 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <section className="print-card min-w-0 rounded-[24px] border border-line bg-surface p-5 lg:p-6">
             <h2 className="text-sm text-muted">{t("shipped")}</h2>
             <p className="mt-3 text-xl leading-snug font-medium tracking-tight">
               <span className="font-mono text-accent">{ticket.key}</span> {l(ticket.title)}
@@ -134,7 +136,7 @@ The data in \`${ticket.data.fileName}\` is realistic but made up for this exerci
                 <dd className="mt-1 font-mono text-lg">{w.runs.length}</dd>
               </div>
               <div className="rounded-[14px] bg-raised p-3">
-                <dt className="text-xs text-muted">PR</dt>
+                <dt className="text-xs text-muted">{t("prShort")}</dt>
                 <dd className="mt-1 text-lg">{w.merged ? (lang === "ar" ? "دُمج" : "Merged") : "–"}</dd>
               </div>
             </dl>
@@ -146,7 +148,7 @@ The data in \`${ticket.data.fileName}\` is realistic but made up for this exerci
             )}
           </section>
 
-          <section className="print-card rounded-[24px] border border-line bg-surface p-5 lg:p-6">
+          <section className="print-card min-w-0 rounded-[24px] border border-line bg-surface p-5 lg:p-6">
             <h2 className="text-sm text-muted">{t("skills")}</h2>
             <ul className="mt-4 space-y-3">
               {skills.map((s) => (
@@ -154,7 +156,7 @@ The data in \`${ticket.data.fileName}\` is realistic but made up for this exerci
                   <span
                     className={`mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${s.done ? "bg-good text-black" : "bg-raised-2 text-muted"}`}
                   >
-                    {s.done ? <Check size={14} aria-label="done" /> : <Minus size={14} aria-label="not this time" />}
+                    {s.done ? <Check size={14} role="img" aria-label={t("skillDone")} /> : <Minus size={14} role="img" aria-label={t("skillNotDone")} />}
                   </span>
                   <span className={s.done ? "" : "text-muted"}>{s.label}</span>
                 </li>
@@ -162,14 +164,14 @@ The data in \`${ticket.data.fileName}\` is realistic but made up for this exerci
             </ul>
             <div className="mt-5 flex flex-wrap gap-1.5">
               {ticket.conceptTags.map((c) => (
-                <span key={c} className="rounded-full border border-line px-2.5 py-1 text-xs text-muted">
-                  {c}
+                <span key={c.en} className="rounded-full border border-line px-2.5 py-1 text-xs text-muted">
+                  {l(c)}
                 </span>
               ))}
             </div>
           </section>
 
-          <section className="print-card rounded-[24px] border border-line bg-surface p-5 lg:col-span-2 lg:p-6">
+          <section className="print-card min-w-0 rounded-[24px] border border-line bg-surface p-5 lg:col-span-2 lg:p-6">
             <div className="flex items-center gap-3">
               <Avatar person={people.manager} size={36} />
               <h2 className="font-medium">{t("managerNote")}</h2>
@@ -177,7 +179,7 @@ The data in \`${ticket.data.fileName}\` is realistic but made up for this exerci
             <RichText text={w.eod ?? ""} className="mt-4 max-w-3xl text-[16px] leading-relaxed text-ink/90" />
           </section>
 
-          <section className="print-card rounded-[24px] border border-line bg-surface p-5 lg:col-span-2 lg:p-6">
+          <section className="print-card min-w-0 rounded-[24px] border border-line bg-surface p-5 lg:col-span-2 lg:p-6">
             <h2 className="font-medium">{t("keepGoing")}</h2>
             <ul className="mt-4 grid gap-2 sm:grid-cols-2">
               {FREE_RESOURCES.map((r) => (

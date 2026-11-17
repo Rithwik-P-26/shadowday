@@ -20,6 +20,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: "#000000",
+  // The on-screen keyboard shrinks the layout (and 100dvh) on Android, so the KeyBar and Run bar stay above it.
+  interactiveWidget: "resizes-content",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

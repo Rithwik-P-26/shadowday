@@ -51,7 +51,17 @@ def test_parse_reading_strips_whitespace():
     )
 
 
+def _check_real_line_parses(line):
+    # A function that gives back None for every line must not pass the "skip" tests below.
+    result = parse_reading(line)
+    assert isinstance(result, dict), (
+        f"parse_reading({line!r}) is a real reading, so it should give a dictionary, but your function gave {result!r}. "
+        f"Get real readings working first, then give back None for the lines to skip."
+    )
+
+
 def test_parse_reading_skips_header_and_blank_lines():
+    _check_real_line_parses("2026-04-14 10:00,G-HAM,1.2")
     for line in ["time,gauge,mm", "time,gauge,mm\n", "", "\n", "   "]:
         result = parse_reading(line)
         assert result is None, (
@@ -61,6 +71,7 @@ def test_parse_reading_skips_header_and_blank_lines():
 
 
 def test_parse_reading_skips_glitches():
+    _check_real_line_parses("2026-04-14 09:45,G-WUR,3.1")
     for line in ["2026-04-14 09:45,G-WUR,ERR", "2026-04-14 09:45,G-WUR,ERR\n"]:
         result = parse_reading(line)
         assert result is None, (

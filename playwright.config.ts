@@ -18,6 +18,8 @@ export default defineConfig({
     screenshot: "only-on-failure",
     actionTimeout: 20_000,
     navigationTimeout: 60_000,
+    // Every /api/agent call gets the scripted reply (app/api/agent/route.ts): deterministic, and no Groq/Gemini quota used.
+    extraHTTPHeaders: { "x-shadowday-scripted": "1" },
   },
   projects: [
     {

@@ -55,7 +55,11 @@ export const WATER: Ticket = {
       { level: 3, text: { en: "For each well, compare today's total with that well's average using the rule Saeed gave you.", ar: "لكل بئر، قارن مجموع اليوم بمتوسط البئر نفسه باستخدام القاعدة التي أعطاك إياها سعيد." } },
     ],
   },
-  conceptTags: ["strings", "loops", "dicts"],
+  conceptTags: [
+    { en: "strings", ar: "النصوص" },
+    { en: "loops", ar: "الحلقات" },
+    { en: "dicts", ar: "القواميس" },
+  ],
 };
 
 export const FLOODS: Ticket = {
@@ -103,7 +107,10 @@ export const FLOODS: Ticket = {
       { level: 3, text: { en: "Loop over the roads and apply Khalid's rule to the upstream gauge.", ar: "مرّ على الطرق وطبّق قاعدة خالد على المقياس الأعلى." } },
     ],
   },
-  conceptTags: ["time windows", "sums"],
+  conceptTags: [
+    { en: "time windows", ar: "النوافذ الزمنية" },
+    { en: "sums", ar: "المجاميع" },
+  ],
 };
 
 export const HEAT: Ticket = {
@@ -152,7 +159,10 @@ export const HEAT: Ticket = {
       { level: 3, text: { en: "Keep the hours that break Fatima's rule.", ar: "احتفظ بالساعات التي تخالف قاعدة فاطمة." } },
     ],
   },
-  conceptTags: ["formulas", "filtering"],
+  conceptTags: [
+    { en: "formulas", ar: "المعادلات" },
+    { en: "filtering", ar: "التصفية" },
+  ],
 };
 
 export const FIXTURE_TICKETS: Record<ArchetypeId, Ticket> = { water: WATER, floods: FLOODS, heat: HEAT };

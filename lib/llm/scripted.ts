@@ -4,6 +4,7 @@ import {
   effectiveMode,
   failingHiddenRuleFns,
   fill,
+  hiddenRuleFns,
   functionNames,
   hintFor,
   isApproved,
@@ -77,14 +78,94 @@ function hasAnyPhrase(text: string, phrases: readonly string[]): boolean {
 }
 
 const REVEAL_EN =
-  /\b(thresholds?|cut-?offs?|cut off|what counts|counts? as|when (do|should|would|will|must) (you|i|we|it|they) (flag|close|stop|alert|warn|worry|shut|pull|call|be flagged)|when to (flag|close|stop|alert|warn|worry)|rules?|limits?|criteria|criterion|how (much|high|hot|long|hard) is too|too (much|high|hot|hard|long)|dangerous|unsafe)\b/i;
-const REVEAL_AR_STEMS = ["حد", "حدود", "قاعدة", "قواعد", "معيار", "معايير", "متى", "عتبة", "يعتبر", "تعتبر", "يحتسب", "خطر", "خطير", "خطيرة", "مسموح"];
+  /\b(thresholds?|cut-?offs?|cut off|what counts|counts? as|when (do|does|should|would|will|must|can|can[’']?t|cannot|need to|have to|has to) (you|i|we|it|they|the crews?|crews?|(the )?workers|the site) (flag|close|stop|alert|warn|worry|shut|pull|call|be flagged)|when (can[’']?t|cannot|can not|shouldn[’']?t|mustn[’']?t|must not|should not) (you|i|we|they|the crews?|crews?|(the )?workers) work|when to (flag|close|stop|alert|warn|worry)|rules?|limits?|criteria|criterion|how (much|high|hot|long|hard) is too|too (much|high|hot|hard|long)|dangerous|unsafe)\b/i;
+// The follow-up questions the hint ladder pushes students toward: "is that the only reason?", "anything else?",
+// "any other condition?", "what about the time of day?", "when exactly?", "which days should be flagged?".
+const REVEAL_FOLLOWUP_EN = new RegExp(
+  "\\b(?:" +
+  [
+    "conditions?",
+    "exceptions?",
+    "only (thing|things|reason|reasons|factor|condition|rule|case|criteri(on|a)|trigger|sign|danger|time)",
+    "(anything|something) (else|more|besides|apart from|other than)",
+    "what else (matters|counts|should|do i|do we|makes|could|can|is there)",
+    "is (that|this|it) (all|everything)",
+    "other (reasons?|conditions?|rules?|factors?|cases?|criteria|triggers?|situations?|exceptions?|limits?|times|hours|days)",
+    "other things? (that )?(matter|count|make|could|can|you)",
+    "when exactly|exactly when|exactly (what|how much|how many|which)",
+    "time of (the )?(day|year)",
+    "(what|which|other|certain|specific) (times|hours)",
+    "which (days?|roads?|readings?|hours|times|dates)",
+    "flag(s|ged|ging)?",
+    "compar(e|es|ed|ing|ison)",
+    "(how|when) (do|does|can|could|would|will|should) (i|we|you|they) (know|tell|judge|decide|spot|recogni[sz]e)",
+    "decide (when|which|if|whether)",
+    "how (much|many|high|hot|heavy|long)\\b[^?.!]{0,40}\\b(ok|okay|fine|allowed|acceptable|normal|safe|too)",
+    "(does|do|would|will|could|can) [^?.!]{0,40}\\bmatters?",
+    "what (else )?matters",
+    "what (worries|scares|concerns) you|worr(y|ies|ied|ying)",
+    "numbers? (i|we) (should|need to|must|have to)",
+    "(should|do|must|need to|have to) (i|we) (look|watch) (out )?for",
+    "look(ing)? for in the (data|readings|numbers)",
+  ]
+    .map((p) => `(?:${p})`)
+    .join("|") +
+  ")\\b",
+  "i",
+);
+const REVEAL_AR_STEMS = [
+  "حد", "حدود", "قاعدة", "قواعد", "معيار", "معايير", "عتبة", "يعتبر", "تعتبر", "يحتسب", "خطر", "خطير", "خطيرة", "مسموح",
+  // follow-ups: conditions, exceptions, "the only", flag / compare / decide, "exactly", worry
+  "شرط", "شروط", "استثناء", "استثناءات", "وحيد", "وحيدة", "أحدد", "أحددها", "نحدد", "نحددها", "تحدد", "تحددها", "يحدد", "حدد",
+  "أقارن", "نقارن", "تقارن", "يقارن", "مقارنة", "بالضبط", "تقرر", "أقرر", "نقرر", "يقلقك", "تقلق", "يقلقني", "يهم",
+  // the future prefix س isn't stripped, so hint 1's "بماذا ستقارن كل يوم" needs its own forms
+  "ستقارن", "سنقارن", "سأقارن", "ستحدد", "سنحدد", "سأحدد", "ستقرر", "سنقرر", "سأقرر", "تقلقك", "السيئ", "السيء", "السيئة",
+];
+const REVEAL_AR_PHRASES = [
+  "كيف أعرف", "كيف نعرف", "كيف أحكم", "كيف تحكم", "كيف نحكم",
+  "شيء آخر", "أشياء أخرى", "سبب آخر", "أسباب أخرى", "عامل آخر", "شروط أخرى", "قواعد أخرى",
+  "هل هذا كل", "هذا كل شيء", "هذا فقط", "فقط هذا", "غير ذلك",
+  "أي الأيام", "أي يوم", "أي الطرق", "أي طريق", "أي الساعات", "أي الأوقات", "أي القراءات",
+  "وقت اليوم", "الوقت مهم", "هل الوقت", "التاريخ مهم", "هل التاريخ", "أوقات أخرى", "ساعات أخرى",
+  "متى يجب", "متى يكون", "متى تكون", "متى يصبح", "متى تصبح", "متى تعتبر", "متى يعتبر", "متى أحدد", "متى نحدد",
+  "متى تقلق", "متى توقف", "متى نوقف", "متى يتوقف", "متى أغلق", "متى نغلق", "متى تغلق", "متى يغلق",
+  "ما الذي يجعل", "ماذا يجعل", "أكثر من اللازم", "كثير جدا",
+  "أي ساعات", "أي أيام", "أي مقياس", "اليوم السيئ", "يوم سيء",
+];
 
-/** The student is asking about the rule: the ticket's own keywords, or a generic "what counts / threshold" question. */
+/** Each customer's own vocabulary for the part of the job their hidden rule is about. */
+const ARCHETYPE_REVEAL: Record<ArchetypeId, { en: RegExp; ar: readonly string[] }> = {
+  water: {
+    en: /\b(over-?pump\w*|pump(s|ed|ing)? too (much|hard)|too much (water|pumping)|bad days?|previous (days?|week)|(last|past) (week|few days)|week before|days? before|spikes?|baseline|how much pumping|percent(age)?)\b/i,
+    ar: ["يضخ كثيرا", "تضخ كثيرا", "ضخ كثير", "زائد", "الأسبوع الماضي", "الأسبوع السابق", "الأيام السابقة", "الأيام التي قبله", "يوم سيئ", "نسبة", "بالمئة"],
+  },
+  floods: {
+    en: /\b(shut\w*|clos(e|es|ed|ing|ure|ures)|re-?open\w*|stays? open|keep (it|them|the roads?) open|how heavy|build(s|ing)? up|storm (is )?(building|builds|growing)|getting (heavier|worse|wetter)|keeps? (raining|rising|climbing)|rain(fall)? (keeps? )?(climbs?|climbing|rises?|rising|increas\w*|builds?|building)|\d+(\.\d+)?\s?mm|millimet\w*|in a row|(many|several|a few|multiple) hours|hours? after hours?|rains? (a little|lightly|slowly|steadily))\b/i,
+    ar: ["أغلق", "يغلق", "تغلق", "نغلق", "إغلاق", "أقفل", "تقفل", "نقفل", "إقفال", "يشتد", "تشتد", "يزداد", "يزيد", "استمر المطر", "يستمر المطر", "ملم", "متتالية", "مفتوحا"],
+  },
+  heat: {
+    en: /\b(lunch\w*|noon|midday|summer|june|july|august|september|(which|what) months?|seasons?|seasonal|stop (work|working)|(must|have to|has to|need to|needs to) stop|work(ing)? outside|outdoor work|(what|which) hours|how hot|feels?[- ]like|46)\b/i,
+    ar: ["الظهر", "الظهيرة", "الغداء", "الصيف", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أي شهر", "الأشهر", "الشهور", "الموسم", "الساعات", "الأوقات", "يتوقف", "توقف", "يمنع العمل", "ممنوع", "الحرارة المحسوسة"],
+  },
+};
+
+/** A leading "hi" / "good afternoon" says nothing about the rule (and "afternoon" would otherwise look like a time question). */
+function withoutGreeting(message: string): string {
+  return message.replace(/^\s*(hi|hello|hey|hiya|yo|salam|salaam|assalamu alaikum|marhaba|ahlan|good (morning|afternoon|evening))\b[\s,!.]*/i, "");
+}
+
+/**
+ * The student is asking about the rule: the ticket's own keywords, a generic "what counts / threshold" question,
+ * a natural follow-up ("is that the only reason?", "what about the time of day?"), or the customer's own vocabulary.
+ */
 export function asksAboutRule(message: string, ticket: Ticket): boolean {
-  if (!message.trim()) return false;
-  if (hasAnyPhrase(message, ticket.hidden?.revealKeywords ?? [])) return true;
-  return REVEAL_EN.test(message) || hasAnyToken(message, REVEAL_AR_STEMS);
+  const msg = withoutGreeting(message);
+  if (!msg.trim()) return false;
+  if (hasAnyPhrase(msg, ticket.hidden?.revealKeywords ?? [])) return true;
+  if (REVEAL_EN.test(msg) || REVEAL_FOLLOWUP_EN.test(msg)) return true;
+  if (hasAnyToken(msg, REVEAL_AR_STEMS) || hasAnyPhrase(msg, REVEAL_AR_PHRASES)) return true;
+  const own = ARCHETYPE_REVEAL[ticket.id];
+  return !!own && (own.en.test(msg) || hasAnyPhrase(msg, own.ar));
 }
 
 const GREETING_EN = /^\s*(hi|hello|hey|hiya|yo|salam|salaam|assalamu|marhaba|ahlan|good (morning|afternoon|evening))\b/i;
@@ -104,9 +185,16 @@ function isCodeQuestion(message: string): boolean {
   return CODE_EN.test(message) || hasAnyToken(message, ["كود", "برمجة", "البرمجة", "دالة", "اختبار", "الاختبار", "خطأ", "متغير", "بايثون", "برنامج"]);
 }
 
+// Requests for the answer, not questions about the student's own work: "is my solution correct?" or
+// "the test says the expected answer is 2" must not be refused.
 const ANSWER_EN =
-  /\b(answer|solution|solve it|solve this|just tell me|tell me the code|give me the code|write the code|write it for me|do it for me|the full code|copy paste|paste the code)\b/i;
-const ANSWER_AR = ["الحل", "حل لي", "حلها", "الجواب", "الإجابة", "أعطني الكود", "اعطني الكود", "اكتب الكود", "اكتب لي", "قل لي الكود", "اكتبه لي"];
+  /\b((give|tell|show|send|write|paste) me (the |your |a )?(answer|solution|code|full code|whole code|complete code|correct code|working code)|what('?s| is) the (answer|solution|correct code)|(can|could|will|would) you (just )?solve (it|this|them)|solve (it|this|them) for me|just tell me|write (it|this|that) for me|write (the|this|my|that) (\w+ )?(function|code) for me|write (the )?\w+_\w+(\(\))?( function)? for me|(the )?(complete|full|whole|entire|finished) (function|code|solution)|do it for me|the full code|the whole code|copy paste|paste the code|write the code|give me the code|tell me the code)\b/i;
+const ANSWER_AR = [
+  "اعطني الحل", "أعطني الحل", "عطني الحل", "قل لي الحل", "ما هو الحل", "اعطني الجواب", "أعطني الجواب",
+  "أعطني الإجابة", "قل لي الجواب", "حل لي", "حلها لي", "حله لي", "حلها بدلا", "أعطني الكود", "اعطني الكود", "اكتب الكود",
+  "اكتب لي الكود", "اكتبه لي", "اكتبها لي", "قل لي الكود", "الكود كامل", "الكود الكامل", "اكتب لي الدالة", "اكتب الدالة",
+  "الدالة كاملة", "اكتب لي الحل", "اكتب الحل",
+];
 export function asksForAnswer(message: string): boolean {
   return ANSWER_EN.test(message) || hasAnyPhrase(message, ANSWER_AR);
 }
@@ -135,7 +223,7 @@ const STAKEHOLDER: Record<ArchetypeId, StakeholderLines> = {
       ],
       ar: [
         "الآن تسأل السؤال الصحيح. في مزرعتي القاعدة بسيطة.",
-        "جيد، هذا ما يهمني. هكذا أعرف أن البئر يعمل أكثر من طاقته.",
+        "جيد، هذا ما يهمني. هكذا أعرف أن البئر تعمل فوق طاقتها.",
         "علّمتني ثلاثون سنة من الزراعة هذا، فاكتبه عندك.",
       ],
     },
@@ -171,13 +259,13 @@ const STAKEHOLDER: Record<ArchetypeId, StakeholderLines> = {
     },
     smallTalk: {
       en: [
-        "My farm in {area} has four wells and about two thousand palms. In summer the pumps run through the night. What exactly do you need to know for your work?",
-        "My father dug the first well here by hand. Today I watch the meters on my phone, thanks to {company}. Ask me something specific and I'll answer straight.",
+        "My farm in {area} has two wells and about two thousand palms. In summer the pumps run through the night. What exactly do you need to know for your work?",
+        "My father dug the first well here by hand. Today I watch the meters on my phone, thanks to {company}. If it's for your report, ask me how I judge my wells and I'll answer straight.",
         "The water has been getting saltier, and the palms show it in their leaves. That is why I signed up with {company}. What do you want to know about my wells?",
       ],
       ar: [
-        "مزرعتي في {area} فيها أربعة آبار ونحو ألفي نخلة. في الصيف تعمل المضخات طوال الليل. ماذا تحتاج أن تعرف بالضبط لعملك؟",
-        "حفر أبي أول بئر هنا بيديه. اليوم أتابع العدادات من هاتفي بفضل {company}. اسألني سؤالاً محدداً وسأجيبك بوضوح.",
+        "مزرعتي في {area} فيها بئران ونحو ألفي نخلة. في الصيف تعمل المضخات طوال الليل. ماذا تحتاج أن تعرف بالضبط لعملك؟",
+        "حفر أبي أول بئر هنا بيديه. اليوم أتابع العدادات من هاتفي بفضل {company}. إن كان سؤالك من أجل التقرير، فاسألني كيف أحكم على آباري وسأجيبك بوضوح.",
         "المياه تزداد ملوحة، ويظهر ذلك على سعف النخيل. لهذا اشتركت مع {company}. ماذا تريد أن تعرف عن آباري؟",
       ],
     },
@@ -228,12 +316,12 @@ const STAKEHOLDER: Record<ArchetypeId, StakeholderLines> = {
     smallTalk: {
       en: [
         "The roads around {area} cross three big wadis. When it rains hard in the mountains, the water comes down fast, sometimes before it even rains in town. What do you need to know?",
-        "In April 2024 we had rain like nobody here had seen. My crews worked two days without sleep. Ask me something specific and I'll tell you how we decide things.",
+        "In April 2024 we had rain like nobody here had seen. My crews worked two days without sleep. Ask me how I decide on a road and I'll tell you.",
         "I get the gauge readings from {company} on my phone. I need them to warn me early, not late. What exactly do you want to know?",
       ],
       ar: [
         "الطرق حول {area} تعبر ثلاثة أودية كبيرة. عندما تمطر بغزارة في الجبال تنزل المياه بسرعة، أحياناً قبل أن تمطر في البلدة. ماذا تحتاج أن تعرف؟",
-        "في أبريل 2024 جاءنا مطر لم يرَ أحد هنا مثله. عملت فرقي يومين بلا نوم. اسألني سؤالاً محدداً وسأخبرك كيف نتخذ القرار.",
+        "في أبريل 2024 جاءنا مطر لم يرَ أحد هنا مثله. عملت فرقي يومين بلا نوم. اسألني كيف أقرر بشأن الطريق وسأخبرك.",
         "تصلني قراءات المقاييس من {company} على هاتفي. أحتاجها أن تنبّهني مبكراً لا متأخراً. ماذا تريد أن تعرف بالضبط؟",
       ],
     },
@@ -280,17 +368,42 @@ const STAKEHOLDER: Record<ArchetypeId, StakeholderLines> = {
     smallTalk: {
       en: [
         "We start at five in the morning to beat the sun. By ten the air near the coast is already heavy and wet. What do you need to know for your work?",
-        "Every summer there is the midday break, by law. But the hours around it can be dangerous too. Ask me something specific and I'll answer.",
+        "Every summer there is the midday break, by law. But the hours around it can be dangerous too. Ask me about my safety rules and I'll answer.",
         "The {company} sensors sit on poles around my site. I check them more than I check my messages. What exactly do you want to know?",
       ],
       ar: [
         "نبدأ العمل في الخامسة صباحاً لنسبق الشمس. وبحلول العاشرة يصبح الهواء قرب الساحل ثقيلاً ورطباً. ماذا تحتاج أن تعرف لعملك؟",
-        "في كل صيف هناك استراحة منتصف النهار بحكم القانون. لكن الساعات حولها قد تكون خطرة أيضاً. اسألني سؤالاً محدداً وسأجيبك.",
+        "في كل صيف هناك استراحة منتصف النهار بحكم القانون. لكن الساعات حولها قد تكون خطرة أيضاً. اسألني عن قواعد السلامة عندي وسأجيبك.",
         "حساسات {company} مثبتة على أعمدة حول موقعي. أتابعها أكثر مما أتابع رسائلي. ماذا تريد أن تعرف بالضبط؟",
       ],
     },
   },
 };
+
+const QUESTION_START_EN = /^\s*(what|which|when|how|why|where|who|is|are|do|does|did|can|could|should|would|will|must|any|anything)\b/i;
+const QUESTION_START_AR = ["ما", "ماذا", "متى", "كيف", "هل", "أي", "لماذا", "كم", "أين", "بماذا", "بم"];
+function isQuestion(message: string): boolean {
+  if (/[?؟]/.test(message)) return true;
+  const msg = withoutGreeting(message);
+  const first = normalizeForMatch(msg).trim().split(/\s+/)[0] ?? "";
+  return QUESTION_START_EN.test(msg) || QUESTION_START_AR.some((w) => normalizeForMatch(w) === first);
+}
+
+/** A question about the customer's world: not a greeting, a thank-you or a code question. */
+function isOnTopicQuestion(message: string): boolean {
+  return !!message.trim() && isQuestion(message) && !isGreeting(message) && !isThanks(message) && !isCodeQuestion(message);
+}
+
+/**
+ * The student's last question got small talk and they're asking again in other words: answer this time,
+ * so rephrasings the keyword lists miss don't loop forever.
+ */
+function isSecondTry(req: AgentRequest, rule: string): boolean {
+  if (!isOnTopicQuestion(req.message ?? "")) return false;
+  if (req.history.some((h) => h.from === "stakeholder" && h.text.includes(rule))) return false;
+  const previous = [...req.history].reverse().find((h) => h.from === "student");
+  return !!previous && isOnTopicQuestion(previous.text);
+}
 
 function stakeholderReply(req: AgentRequest, ctx: ScriptedContext): AgentResponse {
   const { lang } = req;
@@ -299,8 +412,8 @@ function stakeholderReply(req: AgentRequest, ctx: ScriptedContext): AgentRespons
   const lines = STAKEHOLDER[ctx.archetype.id];
   const vars = baseVars(req, ctx);
 
-  if (asksAboutRule(msg, ctx.ticket)) {
-    const rule = (ctx.ticket.hidden.rule[lang] || ctx.ticket.hidden.rule.en).trim();
+  const rule = (ctx.ticket.hidden.rule[lang] || ctx.ticket.hidden.rule.en).trim();
+  if (asksAboutRule(msg, ctx.ticket) || isSecondTry(req, rule)) {
     const text = `${say(lines.revealIntro, lang, seed, vars)} ${rule} ${say(lines.revealOutro, lang, `${seed}#o`, vars)}`;
     return { text, provider: "scripted", revealed: true };
   }
@@ -352,6 +465,16 @@ const MENTOR_LINES = {
       "ما أصغر مدخل يُفشل {fn}؟ ابدأ منه ثم توسّع.",
     ],
   },
+  allGreen: {
+    en: [
+      "Everything is green{cn}! All {total} tests pass. Open a pull request and I'll review it.",
+      "All {total} tests pass, nice work{cn}. Open a pull request when you're ready and I'll take a look.",
+    ],
+    ar: [
+      "كل شيء ناجح{cn}! جميع الاختبارات ناجحة ({total}). افتح طلب الدمج وسأراجعه.",
+      "جميع الاختبارات ناجحة ({total})، عمل رائع{cn}. افتح طلب الدمج عندما تكون جاهزاً وسأراجعه.",
+    ],
+  },
   failingPrefix: { en: ["I see {test} is still failing on {fn}."], ar: ["أرى أن الاختبار {test} ما زال يفشل في {fn}."] },
   hiddenPointer: {
     en: ["One more thing: a test on {hfn} checks a rule that isn't written in the ticket. Ask {stakeholder} about it."],
@@ -388,16 +511,20 @@ function mentorChat(req: AgentRequest, ctx: ScriptedContext): AgentResponse {
   const fn = resolveFocusFn(req, ctx.ticket);
   const vars: Vars = { ...baseVars(req, ctx), fn };
 
-  if (asksForAnswer(msg)) return { text: say(MENTOR_LINES.refuse, lang, seed, vars), provider: "scripted" };
+  const allGreen = isApproved(req.testSummary);
+  const hidden = failingHiddenRuleFns(ctx.ticket, req.testSummary, stakeholderNames(ctx));
+  const pointer = hidden.length ? ` ${say(MENTOR_LINES.hiddenPointer, lang, seed, { ...vars, hfn: hidden[0] })}` : "";
+
+  if (!allGreen && asksForAnswer(msg)) return { text: say(MENTOR_LINES.refuse, lang, seed, vars) + pointer, provider: "scripted" };
   if (!msg.trim() || isGreeting(msg)) return { text: say(MENTOR_LINES.greet, lang, seed, vars), provider: "scripted" };
   if (isThanks(msg)) return { text: say(MENTOR_LINES.thanks, lang, seed, vars), provider: "scripted" };
+  // Nothing left to debug: send them to the pull request instead of asking about the first function.
+  if (allGreen) return { text: say(MENTOR_LINES.allGreen, lang, seed, { ...vars, total: req.testSummary?.total ?? 0 }), provider: "scripted" };
 
   const parts: string[] = [];
   if (firstFailing?.fn) parts.push(say(MENTOR_LINES.failingPrefix, lang, seed, { ...vars, test: firstFailing.name, fn: firstFailing.fn }));
   parts.push(say(MENTOR_LINES.socratic, lang, seed, firstFailing?.fn ? { ...vars, fn: firstFailing.fn } : vars));
-  const hidden = failingHiddenRuleFns(ctx.ticket, req.testSummary, stakeholderNames(ctx));
-  if (hidden.length) parts.push(say(MENTOR_LINES.hiddenPointer, lang, seed, { ...vars, hfn: hidden[0] }));
-  return { text: parts.join(" "), provider: "scripted" };
+  return { text: parts.join(" ") + pointer, provider: "scripted" };
 }
 
 function mentorHint(req: AgentRequest, ctx: ScriptedContext): AgentResponse {
@@ -473,8 +600,20 @@ const REVIEW = {
     ar: "ماذا يحدث مع سطر فارغ أو قيمة ناقصة؟ تحقّق بسيط من ذلك سيجعل الكود أمتن.",
   },
   docs: {
-    en: "Consider a one-line docstring on each function so the next engineer knows what it returns.",
-    ar: "فكّر في إضافة docstring من سطر واحد لكل دالة ليعرف المهندس التالي ماذا تُرجع.",
+    en: "{dfn} has no docstring yet. A one-line docstring would tell the next engineer what it returns.",
+    ar: "الدالة {dfn} ليس لها docstring بعد. سطر واحد يشرح ما تُرجعه سيساعد المهندس التالي.",
+  },
+  ruleComment: {
+    en: "Add a short comment in {hfn} with {stakeholder}'s rule in plain words, so the next engineer knows where the numbers come from.",
+    ar: "أضف تعليقاً قصيراً في {hfn} يشرح قاعدة {stakeholder} بكلمات بسيطة، ليعرف المهندس التالي من أين جاءت الأرقام.",
+  },
+  constant: {
+    en: "If {stakeholder} changes the rule next month, how many lines would you have to edit? A named constant for each number at the top of the file would make that a one-line change.",
+    ar: "لو تغيّرت قاعدة {stakeholder} الشهر القادم، فكم سطراً ستعدّل؟ ثابت باسم واضح لكل رقم في أعلى الملف سيجعل التعديل سطراً واحداً.",
+  },
+  reflect: {
+    en: "Which test was the hardest to make pass, and what did it teach you about {stakeholder}'s data?",
+    ar: "أي اختبار كان الأصعب، وماذا علّمك عن بيانات {stakeholder}؟",
   },
   approved: {
     en: "Approved. All {total} tests pass, so merge when you're ready{cn}.",
@@ -499,6 +638,17 @@ function praiseKey(code: string): keyof typeof REVIEW.praise | null {
   if (/\[[^\]\n]+\bfor\b[^\]\n]+\bin\b[^\]\n]+\]/.test(code)) return "comprehension";
   if (/"""|'''/.test(code)) return "docstring";
   return null;
+}
+
+/** The first function whose body doesn't start with a docstring (any string literal), or null. */
+function missingDocstring(code: string): string | null {
+  const m = code.match(/^[ \t]*def[ \t]+(\w+)[^\n]*:[ \t]*(?:#[^\n]*)?\r?\n(?:[ \t]*\r?\n)*[ \t]*(?![rRuUbBfF]{0,2}["'])\S/m);
+  return m ? m[1] : null;
+}
+
+/** The code already deals with blank lines, missing values or glitches. */
+function handlesEdgeCases(code: string): boolean {
+  return /\.strip\s*\(|==\s*(""|'')|\bnot\s+\w+\s*:|\bis None\b|\bERR\b|\btry\s*:/.test(code);
 }
 
 /** Comments and string contents don't count as variable names. */
@@ -534,7 +684,17 @@ function mentorReview(req: AgentRequest, ctx: ScriptedContext): AgentResponse {
   if (longLine >= 0) suggestions.push(t(REVIEW.long, { line: longLine + 1 }));
   const v = singleLetterVar(code);
   if (v) suggestions.push(t(REVIEW.shortName, { var: v }));
-  suggestions.push(t(REVIEW.edge), t(REVIEW.docs));
+  // Only suggest what the code is actually missing: the starter already has docstrings, and an approved PR
+  // has passed the blank-line and glitch tests.
+  if (!approved && code.trim() && !handlesEdgeCases(code)) suggestions.push(t(REVIEW.edge));
+  const undocumented = missingDocstring(code);
+  if (undocumented) suggestions.push(t(REVIEW.docs, { dfn: undocumented }));
+  if (code.trim()) {
+    const ruleFn = [...hiddenRuleFns(ctx.ticket, stakeholderNames(ctx))][0] ?? functionNames(ctx.ticket).at(-1) ?? okFn;
+    if (!/(^|\s)#/m.test(code)) suggestions.push(t(REVIEW.ruleComment, { hfn: ruleFn }));
+    if (!/^[A-Z][A-Z0-9_]*\s*=/m.test(code)) suggestions.push(t(REVIEW.constant));
+  }
+  if (!suggestions.length) suggestions.push(t(REVIEW.reflect));
 
   const picked = suggestions.slice(0, 3).map((s, i) => `${i + 1}. ${s}`);
   const decision = approved ? t(REVIEW.approved) : ts && ts.total > 0 ? t(REVIEW.changes) : t(REVIEW.noTests);
@@ -569,18 +729,18 @@ const MANAGER_LINES = {
   standup: {
     en: [
       "Quick standup: what are you working on, and is anything blocking you? If the ticket feels vague, that's normal here; ask {stakeholder} what's missing.",
-      "Your focus today is {key}. Get the tests green, then we'll run your code on the real data from {area}.",
+      "Your focus today is {key}. Get the tests green, then we'll run your code on the full dataset for {area}.",
       "At a startup this size everyone talks to customers. Don't be shy about messaging {stakeholder}, and ask Ravi when the code fights back.",
     ],
     ar: [
       "اجتماع سريع: على ماذا تعمل، وهل هناك ما يعيقك؟ إن بدت المهمة غامضة فهذا طبيعي هنا؛ اسأل {stakeholder} عمّا ينقصها.",
-      "تركيزك اليوم على {key}. اجعل الاختبارات كلها ناجحة، ثم سنشغّل الكود على البيانات الحقيقية من {area}.",
+      "تركيزك اليوم على {key}. اجعل الاختبارات كلها ناجحة، ثم سنشغّل الكود على مجموعة البيانات الكاملة لـ{area}.",
       "في شركة ناشئة بهذا الحجم يتحدث الجميع مع العملاء. لا تتردد في مراسلة {stakeholder}، واسأل رافي عندما يصعب عليك الكود.",
     ],
   },
   demoLead: {
-    en: ["I just watched your code run on the real data from {area}.", "Your code just ran on real readings from {area}."],
-    ar: ["شاهدت للتو الكود الخاص بك يعمل على البيانات الحقيقية من {area}.", "الكود الخاص بك عمل للتو على قراءات حقيقية من {area}."],
+    en: ["I just watched your code run on the full dataset for {area}.", "Your code just ran on the full {area} dataset."],
+    ar: ["شاهدت للتو الكود الخاص بك يعمل على مجموعة البيانات الكاملة لـ{area}.", "الكود الخاص بك عمل للتو على مجموعة البيانات الكاملة لـ{area}."],
   },
   demoNoSummary: { en: ["It ran from start to finish."], ar: ["وقد عمل من البداية إلى النهاية."] },
   demoWhy: { en: ["This matters to {stakeholder} because {why}."], ar: ["هذا مهم لـ{stakeholder} لأن {why}."] },

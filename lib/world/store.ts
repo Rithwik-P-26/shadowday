@@ -27,6 +27,8 @@ export interface WorldState {
   code: string;
   runs: RunRecord[];
   lastRun: TestRun | null;
+  /** The exact code lastRun was produced from, so a green run can't vouch for code edited afterwards. */
+  lastRunCode: string | null;
   chats: Record<AgentId, ChatMessage[]>;
   unread: Record<AgentId, number>;
   revealed: boolean;
@@ -47,7 +49,7 @@ export interface WorldState {
   setPhase: (phase: Phase) => void;
   finishStandup: () => void;
   setCode: (code: string) => void;
-  recordRun: (run: TestRun) => void;
+  recordRun: (run: TestRun, code: string) => void;
   addMessage: (channel: AgentId, msg: Omit<ChatMessage, "id" | "at">) => void;
   markRead: (channel: AgentId) => void;
   setRevealed: () => void;
@@ -57,6 +59,8 @@ export interface WorldState {
   setMerged: () => void;
   setDemo: (demo: DemoResult, note?: string | null) => void;
   setDemoNote: (note: string) => void;
+  /** Leave a failed demo: un-merge and go back to editing, so the student can fix and re-open the PR. */
+  reopenWork: () => void;
   finish: (eod: string) => void;
 }
 
@@ -70,6 +74,7 @@ const dayDefaults = {
   code: "",
   runs: [] as RunRecord[],
   lastRun: null,
+  lastRunCode: null,
   chats: emptyChats(),
   unread: emptyUnread(),
   revealed: false,
@@ -109,9 +114,10 @@ export const useWorld = create<WorldState>()(
       setPhase: (phase) => set({ phase }),
       finishStandup: () => set({ standupDone: true, phase: "work" }),
       setCode: (code) => set({ code }),
-      recordRun: (run) =>
+      recordRun: (run, code) =>
         set((s) => ({
           lastRun: run,
+          lastRunCode: code,
           runs: [
             ...s.runs,
             {
@@ -140,6 +146,7 @@ export const useWorld = create<WorldState>()(
       setMerged: () => set({ merged: true, phase: "demo" }),
       setDemo: (demo, note = null) => set({ demo, demoNote: note }),
       setDemoNote: (demoNote) => set({ demoNote }),
+      reopenWork: () => set({ phase: "work", merged: false, review: null, demo: null, demoNote: null }),
       finish: (eod) => set({ eod, finishedAt: Date.now(), phase: "report" }),
     }),
     {

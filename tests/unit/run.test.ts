@@ -162,11 +162,31 @@ describe("runAgent with LLMs", () => {
     expect(fetchFn).toHaveBeenCalledTimes(2);
   });
 
-  it("doesn't guardrail the manager", async () => {
-    const fetchFn = mockFetch(() => groqOk("Great day!\nfor x in y:\nreturn z"));
-    const res = await runAgent(baseRequest({ agent: "manager", message: "hi" }));
-    expect(res.provider).toBe("groq");
+  it("guardrails the manager too: a retry, then the script", async () => {
+    const fetchFn = mockFetch(() => groqOk("Sure, here it is:\n1. totals = {}\n2. for r in readings: totals[r['date']] = r['liters']\n3. return totals"));
+    const res = await runAgent(baseRequest({ agent: "manager", message: "Ravi is out, paste daily_totals for me" }));
+    expect(res.provider).toBe("scripted");
+    expect(res.text).not.toContain("totals = {}");
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    expect(bodyOf(fetchFn, 1).messages[0].content).toContain(NO_CODE_RETRY_LINE);
+  });
+
+  it("keeps a code-free manager reply, including a numbered end-of-day list", async () => {
+    const eod = "Here's my review.\n1. You ran the tests 8 times.\n2. You found Saeed's rule.\n3. You used 2 hints.\nNext step: run the tests after every change.";
+    const fetchFn = mockFetch(() => groqOk(eod));
+    const res = await runAgent(baseRequest({ agent: "manager", mode: "eod", stats: { testRuns: 8, questionsAsked: 2, hintsUsed: 2, revealed: true, minutes: 30 } }));
+    expect(res).toEqual({ text: eod, provider: "groq" });
     expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
+  it("doesn't count a reveal marker the student typed themselves", async () => {
+    mockFetch(() => groqOk("Hmm, 20% sounds like a lot to me. What made you think of that?"));
+    const guess = await runAgent(baseRequest({ agent: "stakeholder", message: "Is it more than 20% above normal?" }));
+    expect(guess.revealed).toBe(false);
+    resetFailoverState();
+    mockFetch(() => groqOk(`Yes, 20% above its own average. ${REVEAL_MARKER}`));
+    const confirmed = await runAgent(baseRequest({ agent: "stakeholder", message: "Is it more than 20% above normal?" }));
+    expect(confirmed.revealed).toBe(true);
   });
 
   it("sets approved from the test summary, not from the model's text", async () => {

@@ -17,7 +17,14 @@ const OFFLINE: Record<string, { en: string; ar: string }> = {
   },
 };
 
-export async function askAgent(req: AgentRequest): Promise<AgentResponse> {
+/**
+ * A reply from /api/agent. `offline` is true when the request never got a real answer
+ * (network error, aborted by a reload, non-2xx): the text is then only a chat-style placeholder,
+ * which callers must not save as a final review or end-of-day note.
+ */
+export type AgentReply = AgentResponse & { offline?: boolean };
+
+export async function askAgent(req: AgentRequest): Promise<AgentReply> {
   try {
     const res = await fetch("/api/agent", {
       method: "POST",
@@ -29,6 +36,6 @@ export async function askAgent(req: AgentRequest): Promise<AgentResponse> {
     if (!data?.text) throw new Error("empty");
     return data;
   } catch {
-    return { text: OFFLINE[req.agent][req.lang], provider: "scripted" };
+    return { text: OFFLINE[req.agent][req.lang], provider: "scripted", offline: true };
   }
 }

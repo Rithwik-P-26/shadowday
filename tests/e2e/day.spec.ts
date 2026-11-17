@@ -1,7 +1,8 @@
 import { unzipSync, strFromU8 } from "fflate";
 import { readFileSync } from "node:fs";
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import {
+  appendToCode,
   assertNoCode,
   expect,
   hideDevOverlay,
@@ -131,10 +132,19 @@ async function talkToStakeholder(page: Page, c: DayCase, lang: Lang) {
   await expect(page.getByText(t.revealed).filter({ visible: true })).toBeVisible();
 }
 
-async function talkToMentor(page: Page, lang: Lang) {
+async function talkToMentor(page: Page, lang: Lang, viaKeyboard = false) {
   const t = L[lang];
-  await page.getByRole("tab", { name: new RegExp(t.mentor) }).click();
-  await expect(page.getByRole("tab", { name: new RegExp(t.mentor) })).toHaveAttribute("aria-selected", "true");
+  const mentorTab = page.getByRole("tab", { name: new RegExp(t.mentor) });
+  if (viaKeyboard) {
+    // The Team tablist is a real tablist: the arrow key in reading direction moves from the customer to Ravi.
+    await page.getByRole("tablist", { name: t.tabs.team }).getByRole("tab", { selected: true }).focus();
+    await page.keyboard.press(lang === "ar" ? "ArrowLeft" : "ArrowRight");
+    await expect(mentorTab).toBeFocused();
+  } else {
+    await mentorTab.click();
+  }
+  await expect(mentorTab).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("region", { name: t.tabs.team }).getByRole("tabpanel")).toBeVisible();
   let before = (await lastMessage(page, "mentor")).count;
   await sendChat(page, t.askAnswer);
   const refusal = await waitForReply(page, "mentor", before);
@@ -150,6 +160,25 @@ async function talkToMentor(page: Page, lang: Lang) {
   assertNoCode(hint, "mentor hint");
 }
 
+/**
+ * Open PR only counts a run of the code that is in the editor now: an edit after the green run locks it again
+ * (with a hint), and putting back exactly the tested code unlocks it without another run.
+ */
+async function expectEditLocksPr(page: Page, pr: Locator, id: TicketId, lang: Lang) {
+  const t = L[lang];
+  await expect(pr).toBeEnabled();
+  await appendToCode(page, "\n# tidy up later\n");
+  await expect(pr).toBeDisabled();
+  await expect(page.getByText(t.codeChanged).filter({ visible: true }).first()).toBeVisible();
+  await injectSolution(page, id);
+  await expect(pr).toBeEnabled();
+}
+
+/** The demo chart. The report's skill check marks are role="img" icons too (lucide), so leave those out. */
+function chart(page: Page) {
+  return page.locator("main svg[role=img]:not(.lucide)");
+}
+
 async function reviewDemoReport(page: Page, shot: Shot, c: DayCase, lang: Lang, name: string) {
   const t = L[lang];
   await expect(page.getByText(t.approved, { exact: true })).toBeVisible({ timeout: 30_000 });
@@ -160,7 +189,7 @@ async function reviewDemoReport(page: Page, shot: Shot, c: DayCase, lang: Lang, 
   await expect(runDemo).toBeVisible();
   await shot("demo-start");
   await runDemo.click();
-  await expect(page.locator("main svg[role=img]")).toBeVisible({ timeout: 60_000 });
+  await expect(chart(page)).toBeVisible({ timeout: 60_000 });
   const wrap = page.getByRole("button", { name: t.wrapUp });
   await expect(wrap).toBeVisible({ timeout: 30_000 });
   await shot("demo-chart");
@@ -170,7 +199,7 @@ async function reviewDemoReport(page: Page, shot: Shot, c: DayCase, lang: Lang, 
   await expectDir(page, lang);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(name);
   await expect(page.getByText(t.reportTitle, { exact: true })).toBeVisible();
-  await expect(page.locator("main svg[role=img]")).toBeVisible();
+  await expect(chart(page)).toBeVisible();
   await shot("report");
 
   const key = ticketJson(c.id).key;
@@ -214,14 +243,14 @@ test.describe("desktop full day", () => {
 
       await talkToStakeholder(page, c, lang);
       await shot("stakeholder-revealed");
-      await talkToMentor(page, lang);
+      await talkToMentor(page, lang, true);
       await shot("mentor-hint");
 
       await injectSolution(page, id);
       await runTests(page, lang, true);
       await shot("all-pass");
       const pr = page.getByRole("button", { name: t.openPrDesktop });
-      await expect(pr).toBeEnabled();
+      await expectEditLocksPr(page, pr, id, lang);
       await pr.click();
 
       await reviewDemoReport(page, shot, c, lang, name);
@@ -271,8 +300,8 @@ async function mobileDay(page: Page, shot: Shot, id: TicketId, lang: Lang) {
   await shot("code-with-solution");
   await runTests(page, lang, true);
   await shot("all-pass");
-  const pr = page.getByRole("button", { name: "PR", exact: true });
-  await expect(pr).toBeEnabled();
+  const pr = page.getByRole("button", { name: t.prShort, exact: true });
+  await expectEditLocksPr(page, pr, id, lang);
   await pr.click();
 
   await reviewDemoReport(page, shot, c, lang, name);
@@ -289,6 +318,127 @@ test.describe("phone day", () => {
   test("floods day in Arabic", async ({ page, shot, problems }) => {
     void problems;
     await mobileDay(page, shot, "floods", "ar");
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// 2b) Desktop: when a coworker can't be reached, or the merged code breaks on the real data.
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * The first /api/agent call for each listed "agent:mode" gets an empty 200 (askAgent treats that like a dropped
+ * connection, and it leaves no console error). Every later call goes through to the server.
+ */
+async function dropFirstReply(page: Page, keys: string[]) {
+  const pending = new Set(keys);
+  await page.route("**/api/agent", async (route) => {
+    let body: { agent?: string; mode?: string } = {};
+    try {
+      body = route.request().postDataJSON() ?? {};
+    } catch {
+      // not JSON: let the server answer it
+    }
+    if (pending.delete(`${body.agent}:${body.mode}`)) {
+      await route.fulfill({ status: 200, contentType: "application/json", body: "{}" });
+      return;
+    }
+    await route.continue();
+  });
+}
+
+async function storeSnapshot(page: Page) {
+  return page.evaluate(() => {
+    const s = (
+      window as unknown as {
+        __shadowday: {
+          getState: () => {
+            phase: string;
+            merged: boolean;
+            review: { approved: boolean } | null;
+            demoNote: string | null;
+            eod: string | null;
+            chats: Record<string, { from: string; text: string }[]>;
+          };
+        };
+      }
+    ).__shadowday.getState();
+    return { phase: s.phase, merged: s.merged, review: s.review, demoNote: s.demoNote, eod: s.eod, mentorTexts: s.chats.mentor.map((m) => m.text) };
+  });
+}
+
+test.describe("recovery paths", () => {
+  test.skip(({ isMobile }) => isMobile, "desktop project only");
+
+  test("retry when a coworker can't be reached, and go back to the code when the demo fails", async ({ page, shot, problems }) => {
+    void problems;
+    const id: TicketId = "water";
+    const c = CASES[id];
+    const lang: Lang = "en";
+    const t = L[lang];
+    const name = NAMES[id];
+    await hideDevOverlay(page);
+    await dropFirstReply(page, ["mentor:review", "manager:demo", "manager:eod"]);
+
+    await startDay(page, shot, c, lang, name);
+    await standup(page, shot, lang, ticketJson(id).key);
+    await injectSolution(page, id);
+    await runTests(page, lang, true);
+    const pr = page.getByRole("button", { name: t.openPrDesktop });
+    await pr.click();
+
+    // 1) Ravi's review doesn't arrive: nothing is saved as a review, and Try again asks him again.
+    await expect(page.getByText(t.reachFailed(t.mentor))).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole("button", { name: t.merge })).toHaveCount(0);
+    let s = await storeSnapshot(page);
+    expect(s.review, "a failed review request is not saved as a review").toBeNull();
+    expect(s.mentorTexts.some((x) => x.startsWith("My connection dropped")), "no offline placeholder in Ravi's chat").toBe(false);
+    await shot("review-unreachable");
+    await page.getByRole("button", { name: t.retry }).click();
+    await expect(page.getByText(t.approved, { exact: true })).toBeVisible({ timeout: 30_000 });
+    await page.getByRole("button", { name: t.merge }).click();
+
+    // 2) The merged code breaks on the full dataset: the error offers a way back to the editor.
+    await appendToCode(page, "\nraise ValueError('only breaks on the full dataset')\n");
+    await page.getByRole("button", { name: t.runDemo }).click();
+    const alert = page.getByRole("alert").filter({ hasText: t.demoFailed });
+    await expect(alert).toBeVisible({ timeout: 60_000 });
+    await expect(alert).toContainText("ValueError");
+    await shot("demo-failed");
+    await alert.getByRole("button", { name: t.backToCode }).click();
+    await expect(page.getByRole("button", { name: t.runTests, exact: true })).toBeVisible();
+    s = await storeSnapshot(page);
+    expect(s).toMatchObject({ phase: "work", merged: false, review: null });
+    // The merged code was never tested as it is now, so the PR stays locked until a fresh green run.
+    await expect(pr).toBeDisabled();
+    await expect(page.getByText(t.codeChanged)).toBeVisible();
+    await shot("back-to-code");
+
+    // 3) Fix, re-run, re-open the PR, merge and demo again. Mariam's note and the wrap-up fail once each.
+    await injectSolution(page, id);
+    await runTests(page, lang, true);
+    await pr.click();
+    await expect(page.getByText(t.approved, { exact: true })).toBeVisible({ timeout: 30_000 });
+    await page.getByRole("button", { name: t.merge }).click();
+    await page.getByRole("button", { name: t.runDemo }).click();
+    await expect(chart(page)).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByText(t.reachFailed(t.manager))).toBeVisible({ timeout: 30_000 });
+    expect((await storeSnapshot(page)).demoNote, "a failed demo note is not saved").toBeNull();
+    await shot("demo-note-unreachable");
+    await page.getByRole("button", { name: t.retry }).click();
+    await expect.poll(async () => (await storeSnapshot(page)).demoNote, { timeout: 30_000 }).not.toBeNull();
+    await expect(page.getByText(t.reachFailed(t.manager))).toHaveCount(0);
+
+    await page.getByRole("button", { name: t.wrapUp }).click();
+    await expect(page.getByRole("alert").filter({ hasText: t.reachFailed(t.manager) })).toBeVisible({ timeout: 30_000 });
+    expect((await storeSnapshot(page)).eod, "a failed wrap-up is not saved as the end-of-day note").toBeNull();
+    await expect(page).toHaveURL(/\/day$/);
+    await shot("wrap-up-unreachable");
+    await page.getByRole("button", { name: t.retry }).click();
+    await page.waitForURL("**/report", { timeout: 30_000 });
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(name);
+    s = await storeSnapshot(page);
+    expect(s.eod, "the end-of-day note is the real reply").toBeTruthy();
+    expect(s.eod!.startsWith("Looks like the connection dropped"), "not the offline placeholder").toBe(false);
   });
 });
 
@@ -319,7 +469,10 @@ test.describe("other screens", () => {
     await shot("redirected-start");
   });
 
-  test("reload mid-day keeps the day and Python still runs", async ({ page, shot, problems, isMobile }) => {
+  test("reload mid-day keeps the day and Python still runs", async ({ page, shot, problems, isMobile }, testInfo) => {
+    // Playwright's WebKit build crashes ("Page crashed") on goto after pushState + reload; it reproduces on a bare
+    // page with no app code, so it is an engine bug, not Shadowday's. Re-enable once Playwright's WebKit is fixed.
+    test.fixme(testInfo.project.name === "iphone-15", "Playwright WebKit crashes on goto after pushState + reload");
     void problems;
     // The dev-tools bubble is left visible here on purpose, so this test's screenshots show where it sits.
     const c = CASES.heat;

@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowLeft, CircleCheck, GitMerge, GitPullRequest, Loader2, MessageSquareWarning } from "lucide-react";
-import { useEffect, useMemo, useRef } from "react";
+import { ArrowLeft, CircleCheck, GitMerge, GitPullRequest, Loader2, MessageSquareWarning, RotateCcw, WifiOff } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Avatar, RichText } from "@/components/ui";
 import { askAgent } from "@/lib/agentClient";
 import { hunks, lineDiff } from "@/lib/diff";
@@ -11,13 +11,16 @@ import { useWorld } from "@/lib/world/store";
 
 export function ReviewView() {
   const day = useDay();
-  const { t, l, lang } = useT();
+  const { t, l, lang, count } = useT();
   const code = useWorld((s) => s.code);
   const review = useWorld((s) => s.review);
   const setReview = useWorld((s) => s.setReview);
   const setPhase = useWorld((s) => s.setPhase);
   const setMerged = useWorld((s) => s.setMerged);
   const asked = useRef(false);
+  // The review request never got a real answer (offline, aborted): offer a retry instead of saving a fake review.
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   const stale = review && review.code !== code;
 
@@ -33,26 +36,31 @@ export function ReviewView() {
       studentName: day.session.name || undefined,
       history: [],
       code: w.code,
-      testSummary: testSummary(),
+      // Only a run of exactly this code counts: an older green run must not get edited code approved.
+      testSummary: testSummary({ fresh: true }),
     }).then((res) => {
+      if (res.offline) {
+        setFailed(true);
+        return;
+      }
       setReview({ text: res.text, approved: !!res.approved, provider: res.provider, code: w.code });
       useWorld.getState().addMessage("mentor", { from: "mentor", text: res.text, provider: res.provider });
     });
-  }, [day, review, stale, lang, setReview]);
+  }, [day, review, stale, lang, setReview, attempt]);
 
   const diff = useMemo(() => (day ? hunks(lineDiff(day.ticket.starter, code)) : []), [day, code]);
   if (!day) return null;
   const { ticket, people } = day;
   const added = diff.filter((d) => d.kind === "add").length;
   const removed = diff.filter((d) => d.kind === "del").length;
-  const loading = !review || stale;
+  const loading = !failed && (!review || stale);
 
   return (
     <div className="scroll-thin min-h-0 flex-1 overflow-y-auto px-4 py-6 lg:px-8 lg:py-10">
       <div className="mx-auto max-w-5xl">
         <div className="flex flex-wrap items-center gap-3">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-good/15 px-3 py-1 text-sm text-good">
-            <GitPullRequest size={15} aria-hidden /> Open
+            <GitPullRequest size={15} aria-hidden /> {t("prOpen")}
           </span>
           <p className="text-sm text-muted">{t("prTitle")}</p>
         </div>
@@ -72,7 +80,7 @@ export function ReviewView() {
               {diff.map((d, i) =>
                 d.kind === "gap" ? (
                   <div key={i} className="bg-white/[0.03] px-4 text-muted">
-                    ⋯ {d.count} unchanged
+                    ⋯ {count("unchangedLines", d.count)}
                   </div>
                 ) : (
                   <div
@@ -102,6 +110,35 @@ export function ReviewView() {
               <p className="mt-4 flex items-center gap-2 text-sm text-muted">
                 <Loader2 size={15} className="animate-spin" aria-hidden /> {t("reviewing")}
               </p>
+            ) : failed ? (
+              <>
+                <p className="mt-4 flex items-start gap-2 text-[15px] leading-relaxed text-ink/90">
+                  <WifiOff size={16} className="mt-1 shrink-0 text-warn" aria-hidden /> {t("reachFailed", { name: l(people.mentor.name) })}
+                </p>
+                <div className="mt-5 flex flex-col gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-primary w-full"
+                    onClick={() => {
+                      asked.current = false;
+                      setFailed(false);
+                      setAttempt((a) => a + 1);
+                    }}
+                  >
+                    <RotateCcw size={16} aria-hidden /> {t("retry")}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-ghost w-full"
+                    onClick={() => {
+                      asked.current = false;
+                      setPhase("work");
+                    }}
+                  >
+                    <ArrowLeft size={16} aria-hidden className="rtl:-scale-x-100" /> {t("backToCode")}
+                  </button>
+                </div>
+              </>
             ) : (
               <>
                 <RichText text={review!.text} className="mt-4 text-[15px] leading-relaxed text-ink/90" />

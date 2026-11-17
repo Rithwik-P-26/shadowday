@@ -74,8 +74,8 @@ export function StandupView() {
           {!done && (
             <li className="flex items-center gap-3 ps-11 text-sm text-muted">
               <TypingDots />
-              <button type="button" className="underline-offset-4 hover:underline" onClick={() => setShown(lines.length)}>
-                {lang === "ar" ? "تخطَّ" : "Skip"}
+              <button type="button" className="-my-3 min-h-[44px] px-2 underline-offset-4 hover:underline" onClick={() => setShown(lines.length)}>
+                {t("skip")}
               </button>
             </li>
           )}
@@ -94,6 +94,11 @@ export function StandupView() {
               <Loader2 size={14} className="animate-spin" aria-hidden />
             )}
             {py === "ready" ? t("pythonReady") : py === "error" ? t("pythonError") : t("pythonLoading")}
+            {py === "error" && (
+              <button type="button" className="btn btn-ghost !min-h-[36px] !px-3 text-sm" onClick={() => void preloadPython().catch(() => {})}>
+                {t("retry")}
+              </button>
+            )}
           </span>
         </div>
       </div>

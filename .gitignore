@@ -54,3 +54,10 @@ public/pyodide/
 __pycache__/
 .taste-skill/*
 !.taste-skill/*.json
+video/tmp/
+video/audio/
+demo/
+
+# local tooling
+.claude/
+public/.taste-skill/

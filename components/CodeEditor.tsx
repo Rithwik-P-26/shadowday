@@ -8,6 +8,7 @@ import CodeMirror, { type ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { tags as tg } from "@lezer/highlight";
 import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { useMemo, useRef } from "react";
+import { type StrKey, useT } from "@/lib/i18n";
 
 const highlight = HighlightStyle.define([
   { tag: [tg.keyword, tg.controlKeyword, tg.definitionKeyword, tg.operatorKeyword], color: "#93f1f7" },
@@ -81,8 +82,8 @@ export function CodeEditor({
   );
 }
 
-const KEYS: { label: string; insert: string; aria?: string }[] = [
-  { label: "⇥", insert: "    ", aria: "Indent" },
+const KEYS: { label: string; insert: string; aria?: StrKey }[] = [
+  { label: "⇥", insert: "    ", aria: "indent" },
   { label: "(", insert: "(" },
   { label: ")", insert: ")" },
   { label: "[", insert: "[" },
@@ -102,13 +103,14 @@ const KEYS: { label: string; insert: string; aria?: string }[] = [
 
 /** A row of symbols that are hard to reach on phone keyboards. */
 export function KeyBar({ editorRef }: { editorRef: React.MutableRefObject<EditorView | null> }) {
+  const { t } = useT();
   return (
-    <div className="code-ltr scroll-thin flex gap-1.5 overflow-x-auto border-t border-line bg-surface px-2 py-2 lg:hidden" role="toolbar" aria-label="Symbols">
+    <div className="code-ltr scroll-thin flex gap-1.5 overflow-x-auto border-t border-line bg-surface px-2 py-2 lg:hidden" role="toolbar" aria-label={t("symbols")}>
       {KEYS.map((k) => (
         <button
           key={k.label}
           type="button"
-          aria-label={k.aria ?? k.label}
+          aria-label={k.aria ? t(k.aria) : k.label}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => {
             const view = editorRef.current;

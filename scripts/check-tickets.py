@@ -6,7 +6,7 @@ Run from the project root:
 
 For each ticket in content/tickets/<id>/ it checks:
   (a) solution.py passes every test
-  (b) starter.py runs and fails at least one test per function (or errors gracefully)
+  (b) starter.py runs and fails at least one test per function, and passes no test (or errors gracefully)
   (c) naive.py fails only tests of the hidden-rule function, and at least one of them
   (d) the demo with solution.py prints a valid DemoResult with flagged and unflagged points
   (e) the demo with starter.py gives an error JSON or a valid result, without crashing
@@ -146,6 +146,9 @@ def check_b(ctx):
         mine = [r for r in report["results"] if r["fn"] == fn]
         need(mine, "no tests ran for %s" % fn)
         need(any(not r["passed"] for r in mine), "starter already passes every test of %s" % fn)
+    # Untouched code must not show any green checks.
+    passing = [r["name"] for r in report["results"] if r["passed"]]
+    need(not passing, "the untouched starter already passes: %s" % ", ".join(passing))
     failing = sum(1 for r in report["results"] if not r["passed"])
     return "%d/%d tests fail" % (failing, len(report["results"]))
 
@@ -240,8 +243,8 @@ def check_h(ctx):
         for lang in ("en", "ar"):
             need(isinstance(value[lang], str) and value[lang].strip(), "%s.%s is empty" % (path, lang))
     meta = ctx["meta"]
-    expected = 4 + len(meta["functions"]) + sum(len(h) for h in meta["hints"].values())
-    need(count == expected, "expected %d L10n fields (title, body, dataNote, rule, summaries, hints), found %d"
+    expected = 4 + len(meta["functions"]) + sum(len(h) for h in meta["hints"].values()) + len(meta["conceptTags"])
+    need(count == expected, "expected %d L10n fields (title, body, dataNote, rule, summaries, hints, conceptTags), found %d"
          % (expected, count))
     return "%d fields filled" % count
 
@@ -283,6 +286,7 @@ def check_i(ctx):
         for text in public_text:
             need(marker not in text, "revealMarker %r already appears in the body or starter" % marker)
     need(3 <= len(meta["conceptTags"]) <= 5, "conceptTags must have 3-5 entries")
+    need(all(isinstance(c, dict) and c.get("en") and c.get("ar") for c in meta["conceptTags"]), "each conceptTags entry needs en and ar")
     need(isinstance(meta.get("dataNote"), dict), "dataNote is missing")
     # The starter ships no reference code and no third-party imports.
     for line in ctx["starter"].splitlines():

@@ -117,6 +117,10 @@ describe("mentor", () => {
     }
     const ar = reply(baseRequest({ lang: "ar", message: "أعطني الحل من فضلك" }));
     expect(ar.text).toMatch(/لن أكتبه|الحل|لا حلول/);
+    for (const message of ["Can you write flag_wells for me?", "Paste the complete function please"]) {
+      expect(reply(baseRequest({ message })).text, message).toMatch(/won't write|answer|spoilers/i);
+    }
+    expect(reply(baseRequest({ lang: "ar", message: "اكتب لي الدالة flag_wells كاملة" })).text).toMatch(/لن أكتبه|الحل|لا حلول/);
   });
 
   it("names the first failing function in chat", () => {
@@ -154,6 +158,65 @@ describe("mentor", () => {
     expect(lines[0]).toMatch(/dict\.get|strip|split|docstring/);
     expect(res.text).toMatch(/print\(\)/);
     expect(res.text).toMatch(/TODO/);
+  });
+
+  it("sends the student to the pull request once every test passes", () => {
+    const green = { passed: 12, total: 12, failing: [] };
+    const en = reply(baseRequest({ message: "All my tests pass now, what next?", testSummary: green }));
+    expect(en.text).toMatch(/pull request/);
+    expect(en.text).toContain("12");
+    expect(en.text).not.toMatch(/parse_reading|What have you tried/);
+    const ar = reply(baseRequest({ lang: "ar", message: "نجحت كل الاختبارات، ماذا بعد؟", testSummary: green }));
+    expect(ar.text).toContain("طلب الدمج");
+    // Not refused either: nothing is left to solve.
+    expect(reply(baseRequest({ message: "Is my solution correct?", testSummary: green })).text).toMatch(/pull request/);
+  });
+
+  it("doesn't treat questions about the student's own work as asking for the answer", () => {
+    const failing = { passed: 3, total: 4, failing: [{ name: "test_flag_uses_own_average", fn: "flag_wells", message: "x" }] };
+    for (const message of ["Is my solution correct now?", "The test says the expected answer is 2 dates, why?"]) {
+      const res = reply(baseRequest({ message, testSummary: failing }));
+      expect(res.text, message).not.toMatch(/won't write|If I give you the answer|No spoilers/);
+      expect(res.text, message).toContain("Saeed");
+    }
+    const ar = reply(baseRequest({ lang: "ar", message: "هل الحل الذي كتبته صحيح؟", testSummary: failing }));
+    expect(ar.text).not.toMatch(/لن أكتبه|إن أعطيتك الحل|لا حلول جاهزة/);
+    expect(ar.text).toContain("سعيد");
+    expect(reply(baseRequest({ lang: "ar", message: "ما الحلقة التي أحتاجها هنا؟" })).text).not.toMatch(/لن أكتبه|إن أعطيتك الحل|لا حلول جاهزة/);
+  });
+
+  it("points to the stakeholder when refusing and a hidden-rule test fails", () => {
+    const failing = { passed: 3, total: 4, failing: [{ name: "test_flag_uses_own_average", fn: "flag_wells", message: "x" }] };
+    const res = reply(baseRequest({ message: "just give me the code", testSummary: failing }));
+    expect(res.text).toMatch(/won't write|answer|spoilers/i);
+    expect(res.text).toContain("Ask Saeed");
+  });
+
+  it("only suggests docstrings and edge cases the code is actually missing", () => {
+    const documented = [
+      "def parse_reading(line):",
+      '    """Turn one line into a dict."""',
+      "    line = line.strip()",
+      "    if not line:",
+      "        return None",
+      "    return line.split(',')",
+      "",
+      "def daily_total(readings, well_id):",
+      "",
+      "    '''Total liters for one well.'''",
+      "    return sum(r['liters'] for r in readings if r)",
+    ].join("\n");
+    const approved = reply(baseRequest({ mode: "review", code: documented, testSummary: { passed: 12, total: 12, failing: [] } }));
+    expect(approved.approved).toBe(true);
+    expect(approved.text).not.toMatch(/docstring|empty line or a missing value/);
+    const numbered = approved.text.split("\n").filter((l) => /^\d\. /.test(l));
+    expect(numbered.length).toBeGreaterThanOrEqual(1);
+    expect(numbered.length).toBeLessThanOrEqual(3);
+
+    const bare = 'def parse_reading(line):\n    """Doc."""\n    return line\n\ndef daily_total(readings, well_id):\n    return 0\n';
+    const res = reply(baseRequest({ mode: "review", code: bare, testSummary: { passed: 4, total: 4, failing: [] } }));
+    expect(res.text).toMatch(/daily_total has no docstring/);
+    expect(res.text).not.toMatch(/parse_reading has no docstring/);
   });
 
   it("flags very long lines", () => {

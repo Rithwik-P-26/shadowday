@@ -105,7 +105,7 @@ function currentTurn(req: AgentRequest, ticket: Ticket): string {
     case "review":
       return withMsg(ar ? "فتحت طلب دمج. هل يمكنك مراجعته؟" : "I've opened a pull request. Can you review it?");
     case "demo":
-      return withMsg(ar ? "شغّلت الكود الخاص بي للتو على البيانات الحقيقية. ما رأيك؟" : "I just ran my code on the real data. What do you think?");
+      return withMsg(ar ? "شغّلت الكود الخاص بي للتو على مجموعة البيانات الكاملة. ما رأيك؟" : "I just ran my code on the full dataset. What do you think?");
     case "eod":
       return withMsg(ar ? "انتهى يومي. كيف كان أدائي؟" : "That's the end of my day. How did I do?");
     default:
@@ -152,11 +152,11 @@ async function askLlm(req: AgentRequest, ctx: ScriptedContext, failover?: Failov
   const mode = effectiveMode(req.agent, req.mode);
   const system = buildSystemPrompt(req, ticket, area, archetype);
   const params = { messages: buildMessages(req, ticket), maxTokens: MAX_TOKENS[mode], temperature: TEMPERATURE[req.agent] };
-  const guarded = req.agent === "mentor" || req.agent === "stakeholder";
+  // Every agent is checked: the manager's prompt carries the whole ticket too, so she could be talked into code.
 
   let result = await generateWithFailover({ system, ...params }, failover);
   if (!result) return null;
-  if (guarded && violatesNoCode(stripMarker(result.text), ticket)) {
+  if (violatesNoCode(stripMarker(result.text), ticket)) {
     result = await generateWithFailover({ system: `${system}\n\n${NO_CODE_RETRY_LINE}`, ...params }, failover);
     if (!result || violatesNoCode(stripMarker(result.text), ticket)) return null;
   }
@@ -166,7 +166,11 @@ async function askLlm(req: AgentRequest, ctx: ScriptedContext, failover?: Failov
   if (!text) return null;
 
   const res: AgentResponse = { text, provider: result.provider };
-  if (req.agent === "stakeholder") res.revealed = detectReveal(result.text, ticket, publicContext(ticket, archetype));
+  if (req.agent === "stakeholder") {
+    // Numbers the student typed themselves (a guess, a quote of the ticket) don't prove the rule was disclosed.
+    const studentText = [req.message ?? "", ...req.history.filter((h) => h.from === "student").map((h) => h.text)].join("\n");
+    res.revealed = detectReveal(result.text, ticket, publicContext(ticket, archetype), studentText);
+  }
   if (req.agent === "mentor" && mode === "review") res.approved = isApproved(req.testSummary);
   return res;
 }

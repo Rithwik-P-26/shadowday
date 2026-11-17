@@ -1,5 +1,6 @@
 import type { Archetype, ArchetypeId, Area, L10n, Lang, Ticket } from "@/lib/types";
 import { MANAGER, MENTOR } from "@/content/regions";
+import { companyName } from "@/lib/agents/flavor";
 
 // Scripted lines that never need an LLM: the standup and the first message from each coworker.
 
@@ -9,12 +10,14 @@ export function standupLines(lang: Lang, ctx: { name: string; area: Area; archet
   const { area, archetype, ticket } = ctx;
   const vars = {
     name: ctx.name || (lang === "ar" ? "زميلنا الجديد" : "there"),
-    company: archetype.company.name,
+    company: companyName(archetype, lang),
     tagline: lang === "en" ? archetype.company.tagline.en.charAt(0).toLowerCase() + archetype.company.tagline.en.slice(1) : archetype.company.tagline.ar,
     area: area.name[lang],
     problem: archetype.problem[lang],
     stakeholder: archetype.stakeholder.name[lang],
     stakeholderRole: archetype.stakeholder.role[lang],
+    // Arabic "is our customer" agrees with the stakeholder's gender.
+    isOurCustomer: archetype.stakeholder.gender === "f" ? "هي عميلتنا" : "هو عميلنا",
     mentor: MENTOR.name[lang],
     key: ticket.key,
     title: ticket.title[lang],
@@ -30,8 +33,8 @@ export function standupLines(lang: Lang, ctx: { name: string; area: Area; archet
   const ar = [
     "صباح الخير يا {name}، وأهلاً بك في {company}! أنا مريم، أدير فريق الهندسة هنا. نحن نصنع {tagline}.",
     "قليل من السياق عن سبب وجودنا: {problem}",
-    "ستعمل اليوم مع شخصين. {stakeholder} هو عميلنا ({stakeholderRole}). و{mentor} هو مهندسنا الأول، ويراجع كل طلب دمج.",
-    "مهمتك هي {key}: {title}. كل التفاصيل في المهمة. الاختبارات في tests.py، وتنتهي عندما تنجح كلها ويوافق {mentor} على طلب الدمج.",
+    "ستعمل اليوم مع شخصين. {stakeholder} {isOurCustomer} ({stakeholderRole}). و{mentor} مهندس أول في فريقنا، ويراجع كل طلب دمج.",
+    "مهمتك هي {key}: {title}. كل التفاصيل في المهمة. الاختبارات في tests.py، وتكون قد انتهيت عندما تنجح كلها ويوافق {mentor} على طلب الدمج.",
     "نصيحة واحدة: إذا كانت المهمة غامضة فلا تخمّن. اسأل العميل. هذا نصف العمل.",
   ];
   return (lang === "ar" ? ar : en).map((s) => fill(s, vars));
@@ -48,7 +51,7 @@ const STAKEHOLDER_HELLO: Record<ArchetypeId, L10n> = {
   },
   heat: {
     en: "Hi {name}. I'm responsible for the crew on site, so this alert matters to me. If anything in the ticket isn't clear, ask me. I know the safety rules by heart.",
-    ar: "مرحباً يا {name}. أنا مسؤولة عن العمال في الموقع، لذلك هذا التنبيه مهم بالنسبة لي. إذا كان أي شيء في المهمة غير واضح فاسألني، فأنا أحفظ قواعد السلامة.",
+    ar: "مرحباً يا {name}. أنا مسؤولة عن العمال في الموقع، لذلك هذا التنبيه مهم بالنسبة لي. إذا كان أي شيء في المهمة غير واضح فاسألني، فأنا أحفظ قواعد السلامة عن ظهر قلب.",
   },
 };
 

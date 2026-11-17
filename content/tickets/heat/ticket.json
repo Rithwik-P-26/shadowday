@@ -6,7 +6,7 @@
   },
   "body": {
     "en": "Hey, welcome to Barid Labs! Here's your first ticket.\nThe sensor at Fatima's site sends temperature and humidity every 30 minutes (see site_sensors.csv). She needs to know when the crew has to stop working outdoors:\n- parse_reading: turn one line of the CSV into a dict\n- is_unsafe: decide if a reading is unsafe. Fatima's danger line is a feels-like temperature of 46 °C or more, and feels_like() is already written for you. She has the full safety rules though, so check with her\n- unsafe_times: list the unsafe times for each date\nThe sensor glitches sometimes and sends ERR. The tests are in tests.py, so run them often!",
-    "ar": "أهلاً بك في باريد لابز! هذه أول مهمة لك.\nيرسل الحساس في موقع فاطمة درجة الحرارة والرطوبة كل 30 دقيقة (انظر ملف site_sensors.csv). وهي تحتاج إلى معرفة الأوقات التي يجب أن يتوقف فيها العمال عن العمل في الهواء الطلق:\n- parse_reading: حوّل سطراً واحداً من ملف CSV إلى قاموس (dict)\n- is_unsafe: قرّر إن كانت القراءة غير آمنة. خط الخطر عند فاطمة هو درجة حرارة محسوسة تبلغ 46 درجة مئوية أو أكثر، والدالة feels_like() مكتوبة لك مسبقاً. لكن قواعد السلامة الكاملة عند فاطمة، فتأكد منها\n- unsafe_times: اذكر الأوقات غير الآمنة لكل تاريخ\nالحساس يتعطل أحياناً ويرسل ERR. الاختبارات موجودة في tests.py، فشغّلها كثيراً!"
+    "ar": "أهلاً بك في باريد لابز! هذه أول مهمة لك.\nيرسل الحساس في موقع فاطمة درجة الحرارة والرطوبة كل 30 دقيقة (انظر ملف site_sensors.csv). وهي تحتاج إلى معرفة الأوقات التي يجب أن يتوقف فيها العمال عن العمل في الهواء الطلق:\n- parse_reading: حوّل سطراً واحداً من ملف CSV إلى قاموس (dict)\n- is_unsafe: قرّر إن كانت القراءة غير آمنة. خط الخطر عند فاطمة هو درجة حرارة محسوسة تبلغ 46 درجة مئوية أو أكثر، والدالة `feels_like()` مكتوبة لك مسبقاً. لكن قواعد السلامة الكاملة عند فاطمة، فتحقّق منها معها\n- unsafe_times: اذكر الأوقات غير الآمنة لكل تاريخ\nالحساس يتعطل أحياناً ويرسل ERR. الاختبارات موجودة في tests.py، فشغّلها كثيراً!"
   },
   "fileName": "heat.py",
   "dataFileName": "site_sensors.csv",
@@ -58,7 +58,7 @@
   "hidden": {
     "rule": {
       "en": "Any reading that feels like 46 °C or more is unsafe, on any day of the year. On top of that, from June 15 to September 15 the UAE midday break applies: no outdoor work from 12:30 until 3:00 pm, so any reading from 12:30 up to (but not including) 15:00 is unsafe, whatever the temperature. Before June 15 and after September 15, the break doesn't apply.",
-      "ar": "أي قراءة تكون فيها درجة الحرارة المحسوسة 46 درجة مئوية أو أكثر غير آمنة، في أي يوم من أيام السنة. وفوق ذلك، تُطبَّق في الإمارات استراحة منتصف النهار من 15 يونيو إلى 15 سبتمبر: لا عمل في الهواء الطلق من الساعة 12:30 حتى الساعة 3:00 عصراً، لذلك فأي قراءة من 12:30 حتى ما قبل 15:00 غير آمنة مهما كانت درجة الحرارة. أما قبل 15 يونيو وبعد 15 سبتمبر فلا تُطبَّق الاستراحة."
+      "ar": "أي قراءة تكون فيها درجة الحرارة المحسوسة 46 درجة مئوية أو أكثر غير آمنة، في أي يوم من أيام السنة. وفوق ذلك، تُطبَّق في الإمارات استراحة منتصف النهار من 15 يونيو إلى 15 سبتمبر: لا عمل في الهواء الطلق من الساعة 12:30 حتى الساعة 3:00 عصراً، لذلك فإن أي قراءة من 12:30 حتى ما قبل 15:00 غير آمنة مهما كانت درجة الحرارة. أما قبل 15 يونيو وبعد 15 سبتمبر فلا تُطبَّق الاستراحة."
     },
     "revealKeywords": [
       "unsafe",
@@ -119,14 +119,14 @@
         "level": 1,
         "text": {
           "en": "Look at '2026-07-14 13:30,S1,44.0,35'. The first column holds two things. How can you pull them apart?",
-          "ar": "انظر إلى '2026-07-14 13:30,S1,44.0,35'. العمود الأول يحتوي على شيئين. كيف تفصل بينهما؟"
+          "ar": "انظر إلى السطر `2026-07-14 13:30,S1,44.0,35`. العمود الأول يحتوي على شيئين. كيف تفصل بينهما؟"
         }
       },
       {
         "level": 2,
         "text": {
           "en": "split(',') cuts the line into columns, and split() with nothing inside the brackets cuts '2026-07-14 13:30' at the space. The in operator tells you whether 'ERR' or an empty string is anywhere in a list. float() turns text into a number.",
-          "ar": "الدالة split(',') تقطع السطر إلى أعمدة، و split() من دون أي شيء بين القوسين تقطع '2026-07-14 13:30' عند المسافة. والعامل in يخبرك إن كان 'ERR' أو نص فارغ موجوداً في أي مكان من القائمة. أما float() فتحوّل النص إلى عدد."
+          "ar": "الدالة `split(',')` تقطع السطر إلى أعمدة، و `split()` من دون أي شيء بين القوسين تقطع `'2026-07-14 13:30'` عند المسافة. والعامل `in` يخبرك إن كان `'ERR'` أو نص فارغ موجوداً في أي مكان من القائمة. أما `float()` فتحوّل النص إلى عدد."
         }
       },
       {
@@ -142,21 +142,21 @@
         "level": 1,
         "text": {
           "en": "feels_like() already handles the heat. Is a high feels-like temperature really the only thing that makes outdoor work unsafe at Fatima's site? Who would know?",
-          "ar": "الدالة feels_like() تتولى أمر الحرارة. لكن هل ارتفاع درجة الحرارة المحسوسة هو فعلاً الشيء الوحيد الذي يجعل العمل في الهواء الطلق غير آمن في موقع فاطمة؟ من يعرف الجواب؟"
+          "ar": "الدالة `feels_like()` تتولى أمر الحرارة. لكن هل ارتفاع درجة الحرارة المحسوسة هو فعلاً الشيء الوحيد الذي يجعل العمل في الهواء الطلق غير آمن في موقع فاطمة؟ من يعرف الجواب؟"
         }
       },
       {
         "level": 2,
         "text": {
           "en": "Call feels_like() with the reading's temp and humidity, and compare the answer using >=. Text like '13:30' or '07-14' compares in the right order with < and <=, and slicing can keep just the month and day of a date.",
-          "ar": "استدعِ feels_like() بدرجة حرارة القراءة ورطوبتها، وقارن الناتج باستخدام >=. والنصوص مثل '13:30' أو '07-14' تُقارَن بالترتيب الصحيح باستخدام < و <=، ويمكن للتقطيع (slicing) أن يحتفظ بالشهر واليوم فقط من التاريخ."
+          "ar": "استدعِ `feels_like()` بدرجة حرارة القراءة ورطوبتها، وقارن الناتج باستخدام `>=`. والنصوص مثل `'13:30'` أو `'07-14'` تُقارَن بالترتيب الصحيح باستخدام `<` و `<=`، ويمكن للتقطيع (slicing) أن يحتفظ بالشهر واليوم فقط من التاريخ."
         }
       },
       {
         "level": 3,
         "text": {
           "en": "1. Ask Fatima for her complete safety rules, and write each one in a comment.\n2. Work out the feels-like temperature with feels_like() and check it against her heat rule.\n3. Check any of her rules that depend on the date or the time of day.\n4. Give back True if any rule says unsafe, otherwise False.",
-          "ar": "1. اطلب من فاطمة قواعد السلامة كاملة، واكتب كل قاعدة في تعليق.\n2. احسب درجة الحرارة المحسوسة باستخدام feels_like() وافحصها حسب قاعدة الحرارة عندها.\n3. افحص أي قاعدة من قواعدها تعتمد على التاريخ أو على وقت اليوم.\n4. أعد True إذا قالت أي قاعدة إن الوضع غير آمن، وإلا فأعد False."
+          "ar": "1. اطلب من فاطمة قواعد السلامة كاملة، واكتب كل قاعدة في تعليق.\n2. احسب درجة الحرارة المحسوسة باستخدام `feels_like()` وافحصها حسب قاعدة الحرارة عندها.\n3. افحص أي قاعدة من قواعدها تعتمد على التاريخ أو على وقت اليوم.\n4. أعد True إذا قالت أي قاعدة إن الوضع غير آمن، وإلا فأعد False."
         }
       }
     ],
@@ -172,17 +172,22 @@
         "level": 2,
         "text": {
           "en": "A dictionary of lists. Add an empty list the first time you see a date, use append() to add unsafe times, and sort() each list at the end. Let is_unsafe() make the decision for you.",
-          "ar": "قاموس من القوائم. أضف قائمة فارغة أول مرة ترى فيها تاريخاً، واستخدم append() لإضافة الأوقات غير الآمنة، ثم sort() لترتيب كل قائمة في النهاية. ودع is_unsafe() تتخذ القرار عنك."
+          "ar": "قاموس من القوائم. أضف قائمة فارغة أول مرة ترى فيها تاريخاً، واستخدم `append()` لإضافة الأوقات غير الآمنة، ثم `sort()` لترتيب كل قائمة في النهاية. ودع `is_unsafe()` تتخذ القرار عنك."
         }
       },
       {
         "level": 3,
         "text": {
           "en": "1. Start with an empty dictionary.\n2. Loop over the readings and skip any that are None.\n3. If the date isn't in the dictionary yet, add it with an empty list.\n4. If is_unsafe() says the reading is unsafe, append its time to that date's list.\n5. After the loop, sort every list.\n6. Give back the dictionary.",
-          "ar": "1. ابدأ بقاموس فارغ.\n2. مرّ على القراءات وتجاوز أي قراءة قيمتها None.\n3. إذا لم يكن التاريخ في القاموس بعد، فأضفه مع قائمة فارغة.\n4. إذا قالت is_unsafe() إن القراءة غير آمنة، فأضف وقتها إلى قائمة ذلك التاريخ.\n5. بعد انتهاء الحلقة، رتّب كل قائمة.\n6. أعد القاموس."
+          "ar": "1. ابدأ بقاموس فارغ.\n2. مرّ على القراءات وتجاوز أي قراءة قيمتها None.\n3. إذا لم يكن التاريخ في القاموس بعد، فأضفه مع قائمة فارغة.\n4. إذا قالت `is_unsafe()` إن القراءة غير آمنة، فأضف وقتها إلى قائمة ذلك التاريخ.\n5. بعد انتهاء الحلقة، رتّب كل قائمة.\n6. أعد القاموس."
         }
       }
     ]
   },
-  "conceptTags": ["string parsing", "booleans", "comparing strings", "dictionaries of lists"]
+  "conceptTags": [
+    { "en": "string parsing", "ar": "تحليل النصوص" },
+    { "en": "booleans", "ar": "القيم المنطقية" },
+    { "en": "comparing strings", "ar": "مقارنة النصوص" },
+    { "en": "dictionaries of lists", "ar": "قواميس من القوائم" }
+  ]
 }

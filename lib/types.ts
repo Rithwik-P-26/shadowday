@@ -25,6 +25,8 @@ export interface Character {
   /** CSS colour for the avatar chip */
   color: string;
   bio: L10n;
+  /** Grammatical gender, for Arabic agreement ("m" when omitted) */
+  gender?: "m" | "f";
 }
 
 export interface Archetype {
@@ -81,7 +83,8 @@ export interface Ticket {
   };
   /** Ordered hint ladder per student function name (3 levels: nudge, concept, near-pseudocode; never solution code) */
   hints: Record<string, Hint[]>;
-  conceptTags: string[];
+  /** Skills the ticket practises, shown as chips on the report */
+  conceptTags: L10n[];
 }
 
 /** Result of running the tests in Pyodide (shape returned by public/py/harness.py run_tests). */

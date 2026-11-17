@@ -128,7 +128,7 @@
         "level": 2,
         "text": {
           "en": "strip() cleans both ends of a string, and split(',') cuts it into a list at every comma. float() turns text like '1250' into the number 1250.0.",
-          "ar": "الدالة strip() تنظّف طرفي النص، و split(',') تقطعه إلى قائمة عند كل فاصلة. أما float() فتحوّل نصاً مثل '1250' إلى العدد 1250.0."
+          "ar": "الدالة `strip()` تنظّف طرفي النص، و `split(',')` تقطعه إلى قائمة عند كل فاصلة. أما `float()` فتحوّل نصاً مثل `'1250'` إلى العدد `1250.0`."
         }
       },
       {
@@ -144,14 +144,14 @@
         "level": 1,
         "text": {
           "en": "You need one total per date. What should happen the first time you see a date, and what should happen the next time you see it?",
-          "ar": "تحتاج إلى مجموع واحد لكل تاريخ. ماذا يجب أن يحدث أول مرة ترى فيها تاريخاً، وماذا يحدث في المرة التالية؟"
+          "ar": "تحتاج إلى مجموع واحد لكل تاريخ. ماذا يجب أن يحدث أول مرة ترى فيها تاريخاً، وماذا يجب أن يحدث في المرة التالية؟"
         }
       },
       {
         "level": 2,
         "text": {
           "en": "Use a dictionary to keep running totals. dict.get(date, 0) gives you the total so far, or 0 if that date isn't in the dictionary yet.",
-          "ar": "استخدم قاموساً لتحتفظ فيه بالمجاميع أثناء الحساب. الدالة dict.get(date, 0) تعطيك المجموع حتى الآن، أو 0 إذا لم يكن التاريخ في القاموس بعد."
+          "ar": "استخدم قاموساً لتحتفظ فيه بالمجاميع أثناء الحساب. الدالة `dict.get(date, 0)` تعطيك المجموع حتى الآن، أو 0 إذا لم يكن التاريخ في القاموس بعد."
         }
       },
       {
@@ -174,17 +174,23 @@
         "level": 2,
         "text": {
           "en": "sorted() gives you the dates in order. A loop over range() gives you each position, so you can reach other days with an index or a slice. sum() and len() help you work out an average.",
-          "ar": "الدالة sorted() تعطيك التواريخ مرتبة. والحلقة على range() تعطيك موقع كل تاريخ، فتستطيع الوصول إلى أيام أخرى بالفهرس أو بالتقطيع (slice). وتساعدك sum() و len() على حساب المتوسط."
+          "ar": "الدالة `sorted()` تعطيك التواريخ مرتبة. والحلقة على `range()` تعطيك موقع كل تاريخ، فتستطيع الوصول إلى أيام أخرى بالفهرس أو بالتقطيع (slice). وتساعدك الدالتان `sum()` و `len()` على حساب المتوسط."
         }
       },
       {
         "level": 3,
         "text": {
           "en": "1. Ask Saeed exactly what counts as over-pumping, and write his rule in a comment.\n2. Put the dates in order with sorted().\n3. Loop over the dates by position, so you can look at the days around each one.\n4. For each date, work out the number Saeed compares it with.\n5. If that day breaks Saeed's rule, add the date to a list.\n6. Give back the list, earliest date first.",
-          "ar": "1. اسأل سعيد بالضبط ما الذي يُعدّ ضخاً زائداً، واكتب قاعدته في تعليق.\n2. رتّب التواريخ باستخدام sorted().\n3. مرّ على التواريخ حسب موقعها، لتتمكن من النظر إلى الأيام المحيطة بكل يوم.\n4. لكل تاريخ، احسب الرقم الذي يقارنه به سعيد.\n5. إذا خالف ذلك اليوم قاعدة سعيد، أضف التاريخ إلى قائمة.\n6. أعد القائمة، بدءاً من أقدم تاريخ."
+          "ar": "1. اسأل سعيد بالضبط ما الذي يُعدّ ضخاً زائداً، واكتب قاعدته في تعليق.\n2. رتّب التواريخ باستخدام `sorted()`.\n3. مرّ على التواريخ حسب موقعها، لتتمكن من النظر إلى الأيام المحيطة بكل يوم.\n4. لكل تاريخ، احسب الرقم الذي يقارنه به سعيد.\n5. إذا خالف ذلك اليوم قاعدة سعيد، أضف التاريخ إلى قائمة.\n6. أعد القائمة، بدءاً من أقدم تاريخ."
         }
       }
     ]
   },
-  "conceptTags": ["string parsing", "dictionaries", "loops", "averages", "sorting"]
+  "conceptTags": [
+    { "en": "string parsing", "ar": "تحليل النصوص" },
+    { "en": "dictionaries", "ar": "القواميس" },
+    { "en": "loops", "ar": "الحلقات" },
+    { "en": "averages", "ar": "المتوسطات" },
+    { "en": "sorting", "ar": "الترتيب" }
+  ]
 }

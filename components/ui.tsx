@@ -17,8 +17,9 @@ export function Avatar({ person, size = 36 }: { person: Pick<Character, "initial
 }
 
 export function Wordmark({ className = "" }: { className?: string }) {
+  const { t } = useT();
   return (
-    <a href="/" className={`text-[17px] font-medium tracking-tight text-ink ${className}`} aria-label="Shadowday home">
+    <a href="/" className={`text-[17px] font-medium tracking-tight text-ink ${className}`} aria-label={t("home")}>
       Shadowday
     </a>
   );
@@ -33,10 +34,9 @@ export function LangToggle({ className = "" }: { className?: string }) {
       type="button"
       onClick={() => setLang(next)}
       className={`btn btn-ghost !min-h-[40px] !px-3.5 text-sm ${className}`}
-      lang={next}
-      aria-label={next === "ar" ? "Switch to Arabic" : "التبديل إلى الإنجليزية"}
     >
-      {t("langSwitch")}
+      {/* The visible label is the button's name (WCAG 2.5.3), spoken in the language it is written in. */}
+      <span lang={next}>{t("langSwitch")}</span>
     </button>
   );
 }
@@ -52,10 +52,10 @@ export function TypingDots() {
 }
 
 /** Very small text formatter: paragraphs, "- " bullets, numbered lines and `inline code`. */
-export function RichText({ text, className = "" }: { text: string; className?: string }) {
+export function RichText({ text, className = "", dir }: { text: string; className?: string; dir?: "auto" }) {
   const blocks = text.trim().split(/\n{2,}/);
   return (
-    <div className={`space-y-2 ${className}`}>
+    <div dir={dir} className={`space-y-2 ${className}`}>
       {blocks.map((block, i) => {
         const lines = block.split("\n");
         const isList = lines.every((l) => /^\s*([-•*]|\d+[.)])\s+/.test(l));
@@ -91,4 +91,23 @@ function inline(s: string) {
       <span key={i}>{p}</span>
     ),
   );
+}
+
+/**
+ * Arrow-key, Home and End navigation for a role="tablist" (ARIA tabs pattern, automatic activation).
+ * Put it on the tablist; its role="tab" children must be in the same order as `ids`.
+ */
+export function onTabListKeyDown<T extends string>(e: React.KeyboardEvent<HTMLElement>, ids: readonly T[], current: T, select: (id: T) => void) {
+  const rtl = getComputedStyle(e.currentTarget).direction === "rtl";
+  const i = ids.indexOf(current);
+  let next: number;
+  if (e.key === "ArrowRight") next = rtl ? i - 1 : i + 1;
+  else if (e.key === "ArrowLeft") next = rtl ? i + 1 : i - 1;
+  else if (e.key === "Home") next = 0;
+  else if (e.key === "End") next = ids.length - 1;
+  else return;
+  e.preventDefault();
+  next = (next + ids.length) % ids.length;
+  select(ids[next]);
+  e.currentTarget.querySelectorAll<HTMLElement>('[role="tab"]')[next]?.focus();
 }

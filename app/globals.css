@@ -122,10 +122,19 @@ body {
   font-family: var(--font-mono);
   line-height: 1.6;
 }
+/* Code shows the characters students must type: no "->" arrows or "==" bars from programming ligatures. */
+.cm-theme-shadowday .cm-scroller,
+.font-mono,
+code,
+kbd,
+pre,
+samp {
+  font-variant-ligatures: none;
+}
 .cm-theme-shadowday .cm-gutters {
   background: transparent;
   border-right: 1px solid var(--line);
-  color: #5c5c5c;
+  color: #8a8a8a;
 }
 .cm-theme-shadowday .cm-activeLine,
 .cm-theme-shadowday .cm-activeLineGutter {
@@ -144,10 +153,19 @@ body {
   unicode-bidi: isolate;
 }
 
-@media (max-width: 1023px) {
+/* 16px or more on phones and touch tablets, or iOS Safari zooms in when the editor is focused. */
+@media (max-width: 1023px), (hover: none) and (pointer: coarse) {
   .cm-theme-shadowday .cm-editor {
-    font-size: 15px;
+    font-size: 16px;
   }
+}
+
+/* The /day shell follows the visible viewport while the iOS keyboard is up (useKeyboardViewport in TopBar.tsx).
+   With the variables unset this is the same as h-dvh. */
+main:has(> [data-day-topbar]) {
+  position: relative;
+  top: var(--app-top, 0px);
+  height: var(--app-h, 100dvh);
 }
 
 @keyframes typing-dot {
@@ -196,6 +214,7 @@ body {
   }
 }
 
+/* Save as PDF: dark text on white paper, whatever colour classes the dark UI uses. */
 @media print {
   html,
   body {
@@ -205,9 +224,39 @@ body {
   .no-print {
     display: none !important;
   }
-  .print-card {
-    border-color: #ccc !important;
-    background: #fff !important;
+  body * {
     color: #000 !important;
+    border-color: #ccc !important;
+  }
+  body .text-muted {
+    color: #555 !important;
+  }
+  body .text-accent {
+    color: #0b6b72 !important;
+  }
+  .print-card,
+  .print-card .bg-surface {
+    background: #fff !important;
+  }
+  .print-card .bg-raised,
+  .print-card .bg-raised-2,
+  .print-card code {
+    background: #f2f2f2 !important;
+  }
+  /* DemoChart: darker bars, labels and rules that show on white */
+  .print-card svg rect {
+    opacity: 1 !important;
+  }
+  .print-card svg rect[fill="#93f1f7"] {
+    fill: #1f8f97;
+  }
+  .print-card svg rect[fill="#ff8a80"] {
+    fill: #d93a2b;
+  }
+  .print-card svg text {
+    fill: #444;
+  }
+  .print-card svg line {
+    stroke: #ccc;
   }
 }
