@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { getArea, getArchetype, MANAGER, MENTOR } from "@/content/regions";
 import { getTicket } from "@/content/tickets";
-import { useWorld } from "@/lib/world/store";
+import { useWorld, type WorldState } from "@/lib/world/store";
 import type { AgentId, AgentRequest, Character } from "@/lib/types";
 
 export function useDay() {
@@ -39,13 +39,30 @@ export function testSummary(opts: { fresh?: boolean } = {}): AgentRequest["testS
   return summary;
 }
 
-/** Status per student function from the latest run: true = all its tests pass. */
+/** True when the latest run ran exactly the code in the editor now. Usable as a useWorld selector. */
+export function isRunFresh(s: Pick<WorldState, "lastRun" | "lastRunCode" | "code"> = useWorld.getState()): boolean {
+  return !!s.lastRun && s.lastRunCode === s.code;
+}
+
+/** True when every test passed on exactly the code in the editor now. Usable as a useWorld selector. */
+export function isGreenNow(s: Pick<WorldState, "lastRun" | "lastRunCode" | "code"> = useWorld.getState()): boolean {
+  const run = s.lastRun;
+  return isRunFresh(s) && !!run?.ok && run.results.length > 0 && run.results.every((r) => r.passed);
+}
+
+/**
+ * Status per student function from the latest run ("pass" = all its tests pass).
+ * Everything is "unknown" once the code was edited after that run: an old green tick must not vouch for new code.
+ * This reads the store directly, so a component that calls it must subscribe to lastRun and isRunFresh to re-render.
+ */
 export function functionStatus(fnNames: string[]): Record<string, "pass" | "fail" | "unknown"> {
-  const run = useWorld.getState().lastRun;
+  const s = useWorld.getState();
+  const run = s.lastRun;
+  const fresh = isRunFresh(s);
   const out: Record<string, "pass" | "fail" | "unknown"> = {};
   for (const fn of fnNames) {
     const rs = run?.results.filter((r) => r.fn === fn) ?? [];
-    out[fn] = !run || !run.ok || rs.length === 0 ? "unknown" : rs.every((r) => r.passed) ? "pass" : "fail";
+    out[fn] = !run || !run.ok || !fresh || rs.length === 0 ? "unknown" : rs.every((r) => r.passed) ? "pass" : "fail";
   }
   return out;
 }

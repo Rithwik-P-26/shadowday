@@ -46,6 +46,8 @@ const STR = {
   standupTitle: { en: "Morning standup", ar: "اجتماع الصباح" },
   pickUpTicket: { en: "Pick up {key}", ar: "استلم المهمة {key}" },
   pythonLoading: { en: "Setting up Python in your browser…", ar: "جارٍ تجهيز بايثون في متصفحك…" },
+  // Phone form of pythonLoading, next to the Run button (the full sentence did not fit).
+  pythonLoadingShort: { en: "Loading Python…", ar: "تحميل بايثون…" },
   pythonReady: { en: "Python is ready", ar: "بايثون جاهز" },
   pythonError: { en: "Python didn't load. Check your connection and try again.", ar: "لم يتم تحميل بايثون. تحقق من الاتصال وحاول مرة أخرى." },
   skip: { en: "Skip", ar: "تخطَّ" },
@@ -67,6 +69,10 @@ const STR = {
   passedOf: { en: "{passed} of {total} passing", ar: "{passed} من {total} ناجحة" },
   allPassing: { en: "All tests pass", ar: "كل الاختبارات ناجحة" },
   codeError: { en: "Your file has an error", ar: "في ملفك خطأ" },
+  // The code was edited after the last run, so its result no longer vouches for the code in the editor.
+  lastRunStale: { en: "Last run: {passed}/{total}", ar: "آخر تشغيل: {passed} من {total}" },
+  lastRunStaleError: { en: "Last run: error", ar: "آخر تشغيل: خطأ" },
+  errorShort: { en: "Error", ar: "خطأ" },
   line: { en: "line {n}", ar: "السطر {n}" },
   output: { en: "Output", ar: "المخرجات" },
   testPassed: { en: "passed", ar: "نجح" },
@@ -74,6 +80,8 @@ const STR = {
   fnPassing: { en: "passing", ar: "ناجحة" },
   fnFailing: { en: "failing", ar: "فاشلة" },
   fnNotRun: { en: "not run yet", ar: "لم تُشغَّل بعد" },
+  fnStale: { en: "changed since the last run", ar: "تغيّر الكود منذ آخر تشغيل" },
+  workspaceNav: { en: "Workspace", ar: "مساحة العمل" },
   symbols: { en: "Symbols", ar: "رموز" },
   indent: { en: "Indent", ar: "مسافة بادئة" },
   askRavi: { en: "Ask Ravi about {fn}", ar: "اسأل رافي عن {fn}" },

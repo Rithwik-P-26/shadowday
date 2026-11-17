@@ -164,14 +164,33 @@ async function talkToMentor(page: Page, lang: Lang, viaKeyboard = false) {
  * Open PR only counts a run of the code that is in the editor now: an edit after the green run locks it again
  * (with a hint), and putting back exactly the tested code unlocks it without another run.
  */
-async function expectEditLocksPr(page: Page, pr: Locator, id: TicketId, lang: Lang) {
+async function expectEditLocksPr(page: Page, pr: Locator, id: TicketId, lang: Lang, desktop: boolean) {
   const t = L[lang];
+  const summary = testSummaryButton(page, lang);
   await expect(pr).toBeEnabled();
+  await expect(summary).toContainText(t.allPass);
+  // Desktop shows Ravi's chat (the last channel used) next to the editor: no hint chip while everything passes.
+  if (desktop) await expect(page.getByRole("button", { name: t.askRavi })).toHaveCount(0);
   await appendToCode(page, "\n# tidy up later\n");
   await expect(pr).toBeDisabled();
   await expect(page.getByText(t.codeChanged).filter({ visible: true }).first()).toBeVisible();
+  // The green run is history now: the summary is muted and the ticket's ticks go neutral.
+  await expect(summary).toContainText(t.lastRunStale);
+  await expect(summary).not.toContainText(t.allPass);
+  if (desktop) {
+    await expect(page.getByRole("img", { name: t.fnPassing, exact: true })).toHaveCount(0);
+    await expect(page.getByRole("img", { name: t.fnStale, exact: true }).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: t.askRavi })).toHaveCount(1);
+  }
   await injectSolution(page, id);
   await expect(pr).toBeEnabled();
+  await expect(summary).toContainText(t.allPass);
+  if (desktop) await expect(page.getByRole("img", { name: t.fnPassing, exact: true }).first()).toBeVisible();
+}
+
+/** The test summary in the action bar (a button that opens the Tests tab on phones): "Tests: <summary>". */
+function testSummaryButton(page: Page, lang: Lang) {
+  return page.getByRole("button", { name: new RegExp(`^${L[lang].tabs.tests}:`) });
 }
 
 /** The demo chart. The report's skill check marks are role="img" icons too (lucide), so leave those out. */
@@ -250,7 +269,7 @@ test.describe("desktop full day", () => {
       await runTests(page, lang, true);
       await shot("all-pass");
       const pr = page.getByRole("button", { name: t.openPrDesktop });
-      await expectEditLocksPr(page, pr, id, lang);
+      await expectEditLocksPr(page, pr, id, lang, true);
       await pr.click();
 
       await reviewDemoReport(page, shot, c, lang, name);
@@ -267,7 +286,7 @@ async function mobileDay(page: Page, shot: Shot, id: TicketId, lang: Lang) {
   const t = L[lang];
   const key = ticketJson(id).key;
   const name = lang === "ar" ? "حمدان" : NAMES[id];
-  const nav = page.getByRole("navigation", { name: "Workspace" });
+  const nav = page.getByRole("navigation", { name: t.workspaceNav, exact: true });
   const tab = (label: string) => nav.getByRole("button", { name: label, exact: false });
 
   await hideDevOverlay(page);
@@ -301,7 +320,7 @@ async function mobileDay(page: Page, shot: Shot, id: TicketId, lang: Lang) {
   await runTests(page, lang, true);
   await shot("all-pass");
   const pr = page.getByRole("button", { name: t.prShort, exact: true });
-  await expectEditLocksPr(page, pr, id, lang);
+  await expectEditLocksPr(page, pr, id, lang, false);
   await pr.click();
 
   await reviewDemoReport(page, shot, c, lang, name);
@@ -411,6 +430,7 @@ test.describe("recovery paths", () => {
     // The merged code was never tested as it is now, so the PR stays locked until a fresh green run.
     await expect(pr).toBeDisabled();
     await expect(page.getByText(t.codeChanged)).toBeVisible();
+    await expect(testSummaryButton(page, lang)).toContainText(t.lastRunStale);
     await shot("back-to-code");
 
     // 3) Fix, re-run, re-open the PR, merge and demo again. Mariam's note and the wrap-up fail once each.
@@ -439,6 +459,57 @@ test.describe("recovery paths", () => {
     s = await storeSnapshot(page);
     expect(s.eod, "the end-of-day note is the real reply").toBeTruthy();
     expect(s.eod!.startsWith("Looks like the connection dropped"), "not the offline placeholder").toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// 2c) Desktop: the keyboard shortcut runs the tests.
+// ---------------------------------------------------------------------------------------------
+
+async function runsAndCode(page: Page) {
+  return page.evaluate(() => {
+    const s = (window as unknown as { __shadowday: { getState: () => { runs: unknown[]; code: string } } }).__shadowday.getState();
+    return { runs: s.runs.length, code: s.code };
+  });
+}
+
+test.describe("keyboard", () => {
+  test.skip(({ isMobile }) => isMobile, "desktop project only");
+
+  test("Cmd+Enter and Ctrl+Enter in the editor run the tests and leave the code alone", async ({ page, shot, problems }) => {
+    void problems;
+    // CodeMirror reads navigator.platform once, when it loads, to decide whether Mod is Cmd or Ctrl.
+    // Pin it per page load so both shortcuts are checked on any host.
+    await page.addInitScript(() => {
+      try {
+        const p = sessionStorage.getItem("e2e-platform");
+        if (p) Object.defineProperty(Navigator.prototype, "platform", { get: () => p, configurable: true });
+      } catch {
+        // about:blank and opaque origins have no sessionStorage
+      }
+    });
+    await hideDevOverlay(page);
+    await startDay(page, shot, CASES.water, "en", NAMES.water);
+    await standup(page, shot, "en", ticketJson("water").key);
+
+    for (const [platform, combo] of [
+      ["MacIntel", "Meta+Enter"],
+      ["Win32", "Control+Enter"],
+    ] as const) {
+      await page.evaluate((p) => sessionStorage.setItem("e2e-platform", p), platform);
+      await page.reload();
+      const editor = page.locator(".cm-content");
+      await expect(editor).toBeVisible();
+      const before = await runsAndCode(page);
+      await editor.click();
+      await page.keyboard.press(combo);
+      await expect
+        .poll(async () => (await runsAndCode(page)).runs, { timeout: 120_000, message: `${combo} runs the tests` })
+        .toBeGreaterThan(before.runs);
+      expect((await runsAndCode(page)).code, `${combo} must not change the code`).toBe(before.code);
+      await expect(page.getByText(L.en.someFailing).filter({ visible: true }).first()).toBeVisible();
+    }
+    await shot("keyboard-run");
   });
 });
 
@@ -479,7 +550,7 @@ test.describe("other screens", () => {
     await startDay(page, shot, c, "en", "Noura");
     await standup(page, shot, "en", ticketJson("heat").key);
     await page.reload();
-    if (isMobile) await page.getByRole("navigation", { name: "Workspace" }).getByRole("button", { name: "Code" }).click();
+    if (isMobile) await page.getByRole("navigation", { name: L.en.workspaceNav, exact: true }).getByRole("button", { name: L.en.tabs.code }).click();
     const runBtn = page.getByRole("button", { name: L.en.runTests, exact: true });
     await expect(runBtn).toBeVisible();
     await shot("work-after-reload");

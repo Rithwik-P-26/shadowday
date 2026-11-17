@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ChatPanel } from "@/components/ChatPanel";
 import { KeyBar } from "@/components/CodeEditor";
-import { TestPanel, TestSummaryPill } from "@/components/TestPanel";
+import { SummaryLabel, TestPanel, TestSummaryPill } from "@/components/TestPanel";
 import { TicketPanel } from "@/components/TicketPanel";
 import { tr, useT } from "@/lib/i18n";
 import { onRunnerStatus, preloadPython, PYTHON_LOAD_ERROR, runTests } from "@/lib/runner/client";
@@ -147,9 +147,12 @@ export function Workspace() {
         <button type="button" className="min-w-0 truncate text-start lg:pointer-events-none" onClick={() => setTab("tests")}>
           <span className="sr-only">{t("tests")}: </span>
           {running && py === "loading" ? (
-            <span className="inline-flex items-center gap-1.5 text-sm text-muted">
-              <Loader2 size={15} className="animate-spin" aria-hidden /> {t("pythonLoading")}
-            </span>
+            <SummaryLabel
+              icon={<Loader2 size={15} className="shrink-0 animate-spin" aria-hidden />}
+              short={t("pythonLoadingShort")}
+              full={t("pythonLoading")}
+              tone="text-muted"
+            />
           ) : (
             <TestSummaryPill />
           )}
@@ -208,7 +211,7 @@ export function Workspace() {
         {tab === "tests" && <TestPanel />}
       </div>
       {(tab === "code" || tab === "tests") && actionBar}
-      <nav className="grid grid-cols-4 border-t border-line bg-bg pb-[env(safe-area-inset-bottom)]" aria-label="Workspace">
+      <nav className="grid grid-cols-4 border-t border-line bg-bg pb-[env(safe-area-inset-bottom)]" aria-label={t("workspaceNav")}>
         {TABS.map((x) => (
           <button
             key={x.id}

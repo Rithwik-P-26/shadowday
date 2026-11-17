@@ -20,10 +20,13 @@ export function effectiveMode(agent: AgentId, mode: AgentMode): AgentMode {
   return SUPPORTED_MODES[agent].includes(mode) ? mode : "chat";
 }
 
-/** The approval rule for a pull request. Computed server-side, never by the LLM. */
+/** The approval rule for a pull request. Computed server-side, never by the LLM. A file that doesn't load is never approved. */
 export function isApproved(summary: AgentRequest["testSummary"]): boolean {
-  return !!summary && summary.total > 0 && summary.passed === summary.total;
+  return !!summary && !summary.error && summary.total > 0 && summary.passed === summary.total;
 }
+
+/** Longest load-error message kept from the client (the client already clips it to this). */
+export const MAX_LOAD_ERROR_CHARS = 300;
 
 /** FNV-1a 32-bit. Deterministic variant picking for scripted replies. */
 export function hashString(s: string): number {

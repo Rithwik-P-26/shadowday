@@ -14,7 +14,7 @@ Built solo for [Bridge The Gap Hacks](https://sq-hacks.devpost.com) (Nov 15–20
 ## Why
 
 - Since the 2025–26 school year, AI has been a required subject in every UAE public school, from kindergarten to Grade 12 ([WAM](https://www.wam.ae/en/article/15qfeob-national-identity-shape-uae’s-2025–2026-academic)).
-- The places where students could *see* tech work are concentrated: Dubai-based companies raised about 98% of UAE tech funding in the first nine months of 2025 (Tracxn data reported by [Valu.vc](https://valu.vc/uae-startup-funding/)).
+- The places where students could *see* tech work are concentrated: 99% of UAE tech funding in January–September 2026 went to companies in Dubai (69%) and Abu Dhabi (30%) (Tracxn, *UAE Tech 9M 2026* report, via [Zawya](https://www.zawya.com/en/press-release/companies-news/moove-cargo-x-and-tabby-raise-733mln-combined-accounting-for-49-of-uae-techs-1.5bln-in-9m-2026-1857288)).
 - Research on inventors finds that childhood *exposure* to innovation shapes who becomes an inventor (Bell, Chetty, Jaravel, Petkova & Van Reenen, *Who Becomes an Inventor in America?*, QJE 2019).
 
 A student in Liwa, Dibba or Kalba learns AI in class but rarely sees what an engineer's day looks like. Shadowday lets them live one.

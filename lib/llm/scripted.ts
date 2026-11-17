@@ -12,6 +12,7 @@ import {
   pick,
   resolveFocusFn,
   sanitizeName,
+  truncate,
 } from "@/lib/agents/util";
 
 // Deterministic replies for every agent × mode × language. Used when no LLM key is set, when the
@@ -77,6 +78,49 @@ function hasAnyPhrase(text: string, phrases: readonly string[]): boolean {
   });
 }
 
+function escapeRe(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const AR_START = /^[؀-ۿ]/;
+// Arabic attaches small words to the next one: و / ف ("and"), ب / ك / ل ("with", "like", "for"), س (future),
+// and the article ال, which becomes لل after ل ("للحد"). A keyword may also carry a pronoun suffix ("إغلاقها").
+// Text is already normalized (ة → ه), so "ه" covers both the suffix and a feminine ending.
+const AR_SUFFIX = "(?:ه|ها|هم|هما|هن|ك|كم|كما|ي|نا|ني|ون|ين|ان|ات)?";
+const NOT_WORD_BEFORE = "(?<![\\p{L}\\p{N}])";
+const NOT_WORD_AFTER = "(?![\\p{L}\\p{N}])";
+const keywordRes = new Map<string, RegExp | null>();
+
+/**
+ * A whole-word pattern for one ticket keyword: "break" doesn't match "breakfast", "close" doesn't match "closer".
+ * English keywords may take a plural "s"/"es"; Arabic ones may take a clitic prefix and a pronoun suffix.
+ */
+function keywordRe(keyword: string): RegExp | null {
+  const cached = keywordRes.get(keyword);
+  if (cached !== undefined) return cached;
+  const needle = normalizeForMatch(keyword).trim();
+  let re: RegExp | null = null;
+  if (needle) {
+    let body: string;
+    if (AR_START.test(needle)) {
+      const rest = needle.startsWith("ال") ? needle.slice(2) : null;
+      const prefix = rest !== null ? "[وف]?(?:[بك]?ال|لل)" : "[وف]?(?:[بكلس]|[بك]?ال|لل)?";
+      body = prefix + escapeRe(rest ?? needle).replace(/\s+/g, "\\s+") + AR_SUFFIX;
+    } else {
+      body = escapeRe(needle).replace(/\s+/g, "\\s+") + (/[a-z]$/.test(needle) ? "(?:s|es)?" : "");
+    }
+    re = new RegExp(NOT_WORD_BEFORE + body + NOT_WORD_AFTER, "u");
+  }
+  keywordRes.set(keyword, re);
+  return re;
+}
+
+/** True if any keyword appears in the text as a whole word (or whole phrase). */
+export function hasAnyKeyword(text: string, keywords: readonly string[]): boolean {
+  const hay = normalizeForMatch(text);
+  return keywords.some((k) => keywordRe(k)?.test(hay) ?? false);
+}
+
 const REVEAL_EN =
   /\b(thresholds?|cut-?offs?|cut off|what counts|counts? as|when (do|does|should|would|will|must|can|can[’']?t|cannot|need to|have to|has to) (you|i|we|it|they|the crews?|crews?|(the )?workers|the site) (flag|close|stop|alert|warn|worry|shut|pull|call|be flagged)|when (can[’']?t|cannot|can not|shouldn[’']?t|mustn[’']?t|must not|should not) (you|i|we|they|the crews?|crews?|(the )?workers) work|when to (flag|close|stop|alert|warn|worry)|rules?|limits?|criteria|criterion|how (much|high|hot|long|hard) is too|too (much|high|hot|hard|long)|dangerous|unsafe)\b/i;
 // The follow-up questions the hint ladder pushes students toward: "is that the only reason?", "anything else?",
@@ -105,8 +149,19 @@ const REVEAL_FOLLOWUP_EN = new RegExp(
     "what (else )?matters",
     "what (worries|scares|concerns) you|worr(y|ies|ied|ying)",
     "numbers? (i|we) (should|need to|must|have to)",
-    "(should|do|must|need to|have to) (i|we) (look|watch) (out )?for",
+    "(should|do|must|need to|have to) (i|we|you) (look|watch) (out )?for",
     "look(ing)? for in the (data|readings|numbers)",
+    // "what would make you call / close / stop...", "at what point...", "when is a day considered bad?"
+    "what (would|will|could|should|does|do) (make|get) you",
+    "at what (point|level|number|amount|temperature|time)",
+    "considered",
+    "(not|isn[’']?t|aren[’']?t|no longer|never) safe|safe (to|enough)",
+    "max|maximum|minimum|too many",
+    "(always|ever|really) (bad|a problem|dangerous|unsafe|too much|ok|okay|fine|safe)",
+    "(high|higher|big|bigger|large|larger|low|lower|huge) (numbers?|readings?|values?|amounts?)",
+    "(becomes?|counts? as|turns? into|is it|is that|it[’']?s) (a |an )?(problem|issue|emergency)",
+    "(alert|warn|notify) (you|me|us|them|the)",
+    "(send|sends|sending|give|gives|raise|issue|trigger)( out)? (an |the |a )?(alerts?|warnings?|alarms?)",
   ]
     .map((p) => `(?:${p})`)
     .join("|") +
@@ -120,6 +175,8 @@ const REVEAL_AR_STEMS = [
   "أقارن", "نقارن", "تقارن", "يقارن", "مقارنة", "بالضبط", "تقرر", "أقرر", "نقرر", "يقلقك", "تقلق", "يقلقني", "يهم",
   // the future prefix س isn't stripped, so hint 1's "بماذا ستقارن كل يوم" needs its own forms
   "ستقارن", "سنقارن", "سأقارن", "ستحدد", "سنحدد", "سأحدد", "ستقرر", "سنقرر", "سأقرر", "تقلقك", "السيئ", "السيء", "السيئة",
+  // maximum / minimum, "when do I warn you", alerts and alarms
+  "أقصى", "أدنى", "أنبهك", "ننبهك", "تنبهني", "أنبه", "ننبه", "أحذرك", "نحذرك", "تحذرني", "تنبيه", "تنبيها", "تحذير", "إنذار",
 ];
 const REVEAL_AR_PHRASES = [
   "كيف أعرف", "كيف نعرف", "كيف أحكم", "كيف تحكم", "كيف نحكم",
@@ -131,23 +188,44 @@ const REVEAL_AR_PHRASES = [
   "متى تقلق", "متى توقف", "متى نوقف", "متى يتوقف", "متى أغلق", "متى نغلق", "متى تغلق", "متى يغلق",
   "ما الذي يجعل", "ماذا يجعل", "أكثر من اللازم", "كثير جدا",
   "أي ساعات", "أي أيام", "أي مقياس", "اليوم السيئ", "يوم سيء",
+  "غير آمن", "دائما سيء", "دائما سيئ", "دائما خطر", "عند أي", "في أي لحظة", "إلى أي حد", "ما الذي يدفعك",
 ];
 
 /** Each customer's own vocabulary for the part of the job their hidden rule is about. */
 const ARCHETYPE_REVEAL: Record<ArchetypeId, { en: RegExp; ar: readonly string[] }> = {
   water: {
-    en: /\b(over-?pump\w*|pump(s|ed|ing)? too (much|hard)|too much (water|pumping)|bad days?|previous (days?|week)|(last|past) (week|few days)|week before|days? before|spikes?|baseline|how much pumping|percent(age)?)\b/i,
-    ar: ["يضخ كثيرا", "تضخ كثيرا", "ضخ كثير", "زائد", "الأسبوع الماضي", "الأسبوع السابق", "الأيام السابقة", "الأيام التي قبله", "يوم سيئ", "نسبة", "بالمئة"],
+    en: /\b(over-?pump\w*|pump(s|ed|ing)? too (much|hard)|too much (water|pumping)|bad (pumping |pump |water |well )?(days?|nights?|weeks?)|(pump\w*|water|wells?|numbers?|readings?|amounts?|lit(er|re)s?) (is |are |was |gets? )?(always |ever |really )?(bad|wrong|worrying)|(call|warn|alert|ring|phone|tell|contact) (the |your )?(pump )?operators?|(turn|switch|shut)(s|ed|ing)? (it |them |the pumps? |the wells? )?(off|down)|previous (days?|week)|(last|past) (week|few days)|week before|days? before|spikes?|baseline|how much pumping|percent(age)?)\b/i,
+    ar: [
+      "يضخ كثيرا", "تضخ كثيرا", "ضخ كثير", "زائد", "الأسبوع الماضي", "الأسبوع السابق", "الأيام السابقة", "الأيام التي قبله", "يوم سيئ", "نسبة", "بالمئة",
+      // "is a big number always bad?", "what is normal?", "when do you call the pump operator / switch the pump off?"
+      "سيئ", "سيء", "طبيعي", "رقم كبير", "الرقم الكبير", "رقم عال", "الرقم العالي", "مشغل", "تتصل", "تطفئ", "أطفئ", "نطفئ", "إطفاء", "أوقف المضخة", "توقف المضخة",
+    ],
   },
   floods: {
-    en: /\b(shut\w*|clos(e|es|ed|ing|ure|ures)|re-?open\w*|stays? open|keep (it|them|the roads?) open|how heavy|build(s|ing)? up|storm (is )?(building|builds|growing)|getting (heavier|worse|wetter)|keeps? (raining|rising|climbing)|rain(fall)? (keeps? )?(climbs?|climbing|rises?|rising|increas\w*|builds?|building)|\d+(\.\d+)?\s?mm|millimet\w*|in a row|(many|several|a few|multiple) hours|hours? after hours?|rains? (a little|lightly|slowly|steadily))\b/i,
-    ar: ["أغلق", "يغلق", "تغلق", "نغلق", "إغلاق", "أقفل", "تقفل", "نقفل", "إقفال", "يشتد", "تشتد", "يزداد", "يزيد", "استمر المطر", "يستمر المطر", "ملم", "متتالية", "مفتوحا"],
+    en: /\b(shut\w*|clos(e|es|ed|ing|ure|ures)|re-?open\w*|stays? open|keep (it|them|the roads?) open|stay away|keep (people|cars|drivers|traffic) (out|away|off)|block(s|ed|ing)?|barriers?|how (heavy|deep|bad|strong)|heavy rain|(a lot|lots) of rain|rain(s|ed|ing)? (a lot|heavily|hard|really hard)|(one|a single|single|each|every|per) hour|(roads?|wadis?) (is |are |gets? |get )?(flood(ed|s|ing)?|under ?water)|build(s|ing)? up|storm (is )?(building|builds|growing)|getting (heavier|worse|wetter)|keeps? (raining|rising|climbing)|rain(fall)? (keeps? )?(climbs?|climbing|rises?|rising|increas\w*|builds?|building)|\d+(\.\d+)?\s?mm|millimet\w*|in a row|(many|several|a few|multiple) hours|hours? after hours?|rains? (a little|lightly|slowly|steadily))\b/i,
+    ar: [
+      "أغلق", "يغلق", "تغلق", "نغلق", "إغلاق", "أقفل", "تقفل", "نقفل", "إقفال", "يشتد", "تشتد", "يزداد", "يزيد", "استمر المطر", "يستمر المطر", "ملم", "متتالية", "مفتوحا",
+      // "is one hour of rain enough?", "what if it rains a lot?", "when does the road flood?"
+      "ساعة واحدة", "غزير", "مطر كثير", "أمطرت كثيرا", "تمطر كثيرا", "يغرق", "تغرق", "الغرق", "غرقت",
+    ],
   },
   heat: {
-    en: /\b(lunch\w*|noon|midday|summer|june|july|august|september|(which|what) months?|seasons?|seasonal|stop (work|working)|(must|have to|has to|need to|needs to) stop|work(ing)? outside|outdoor work|(what|which) hours|how hot|feels?[- ]like|46)\b/i,
-    ar: ["الظهر", "الظهيرة", "الغداء", "الصيف", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أي شهر", "الأشهر", "الشهور", "الموسم", "الساعات", "الأوقات", "يتوقف", "توقف", "يمنع العمل", "ممنوع", "الحرارة المحسوسة"],
+    en: /\b(lunch\w*|noon|midday|summer|june|july|august|september|(which|what) months?|seasons?|seasonal|stop(s|ped|ping)?|stop (work|working)|(must|have to|has to|need to|needs to) stop|go (inside|indoors|in)|come (inside|in|indoors)|take (a |their |the )?breaks?|(take|have|get|need) (a )?rest|(to|they|workers|crews?|people|men|everyone|we) rest(s|ing)?|cool(ing)? (off|down)|shade|shelter|(send|bring|call|pull|move)(s|ing)? (the |my |your |all )?(workers|crews?|them|everyone|people|men|team)( back)? (in|inside|indoors|home|off)|(be|stay|go|stand|standing) (outside|outdoors|in the sun)|work(ing)? outside|outdoor work|(what|which) hours|how hot|hottest|too warm|heat ?stroke|humid\w*|feels?[- ]like|46)\b/i,
+    ar: [
+      "الظهر", "الظهيرة", "الغداء", "الصيف", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أي شهر", "الأشهر", "الشهور", "الموسم", "الساعات", "الأوقات", "يتوقف", "توقف", "يمنع العمل", "ممنوع", "الحرارة المحسوسة",
+      // "when do the workers rest / go inside?", "is it too hot to work?", "does humidity matter?"
+      "يرتاح", "راحة", "يدخل", "ندخل", "الداخل", "الظل", "لا يعمل", "لا يعملون", "حار جدا", "حر شديد", "شديد الحرارة", "رطوبة",
+    ],
   },
 };
+
+/**
+ * Everyday phrases that contain a rule word without asking about the rule: "since when" / "منذ متى" means "how long",
+ * and "close to" / "close by" is about distance, not closing a road.
+ */
+function withoutInnocentPhrases(message: string): string {
+  return message.replace(/\b(since when|close (to|by)|up close)\b/gi, " ").replace(/منذ\s+متى/g, " ");
+}
 
 /** A leading "hi" / "good afternoon" says nothing about the rule (and "afternoon" would otherwise look like a time question). */
 function withoutGreeting(message: string): string {
@@ -159,9 +237,9 @@ function withoutGreeting(message: string): string {
  * a natural follow-up ("is that the only reason?", "what about the time of day?"), or the customer's own vocabulary.
  */
 export function asksAboutRule(message: string, ticket: Ticket): boolean {
-  const msg = withoutGreeting(message);
+  const msg = withoutInnocentPhrases(withoutGreeting(message));
   if (!msg.trim()) return false;
-  if (hasAnyPhrase(msg, ticket.hidden?.revealKeywords ?? [])) return true;
+  if (hasAnyKeyword(msg, ticket.hidden?.revealKeywords ?? [])) return true;
   if (REVEAL_EN.test(msg) || REVEAL_FOLLOWUP_EN.test(msg)) return true;
   if (hasAnyToken(msg, REVEAL_AR_STEMS) || hasAnyPhrase(msg, REVEAL_AR_PHRASES)) return true;
   const own = ARCHETYPE_REVEAL[ticket.id];
@@ -499,6 +577,83 @@ const MENTOR_LINES = {
   },
 } satisfies Record<string, Pool | Pool[]>;
 
+// The student's file doesn't load (no test could run): Ravi names the error and its line and asks one question about it.
+type LoadError = NonNullable<NonNullable<AgentRequest["testSummary"]>["error"]>;
+type LoadErrorKind = "indent" | "syntax" | "name" | "other";
+
+const LOAD_ERROR_LINES = {
+  lead: {
+    en: ["Before any test can run, Python has to load {file}, and right now it stops{atline} with this error: {etype}."],
+    ar: ["قبل أن يعمل أي اختبار، يجب أن يحمّل بايثون الملف {file}، لكنه يتوقف الآن{atline} بهذا الخطأ: {etype}."],
+  },
+  message: { en: ['The message says: "{emsg}".'], ar: ["رسالة الخطأ تقول: «{emsg}»."] },
+  refuse: { en: ["I won't write the fix for you, but you can find it."], ar: ["لن أكتب الإصلاح بدلاً منك، لكنك تستطيع أن تجده."] },
+  hintNote: {
+    en: ["Before the hint: {file} doesn't load yet ({etype}{atline}), so no test can run until that's fixed."],
+    ar: ["قبل التلميح: الملف {file} لا يُحمَّل بعد (خطأ {etype}{atline})، فلن يعمل أي اختبار قبل إصلاحه."],
+  },
+  question: {
+    indent: {
+      en: ["Look at line {line} and the line just above it. Should they start at the same depth, or should one sit further in? Why?"],
+      ar: ["انظر إلى السطر {line} والسطر الذي فوقه مباشرة. هل يجب أن يبدآ من العمق نفسه، أم يجب أن يكون أحدهما أبعد إلى الداخل؟ ولماذا؟"],
+    },
+    syntax: {
+      en: ["What was Python expecting to see on line {line} that isn't there? Check the end of the line above it too, since Python sometimes notices a problem one line late."],
+      ar: ["ما الذي كان بايثون يتوقع أن يراه في السطر {line} ولم يجده؟ تحقّق أيضاً من نهاية السطر الذي فوقه، فأحياناً يلاحظ بايثون المشكلة متأخراً بسطر."],
+    },
+    name: {
+      en: ["Which name does Python say it doesn't know on line {line}, and where did you expect it to be defined?"],
+      ar: ["أي اسم يقول بايثون إنه لا يعرفه في السطر {line}، وأين توقعت أن يكون معرّفاً؟"],
+    },
+    other: {
+      en: ["In your own words, what is that message telling you, and what does line {line} do?"],
+      ar: ["بكلماتك أنت، ماذا تخبرك هذه الرسالة، وماذا يفعل السطر {line}؟"],
+    },
+  },
+  // the same questions when Python gave no line number
+  questionNoLine: {
+    indent: {
+      en: ["Which line starts at a different depth than you meant? Compare each line with the one just above it."],
+      ar: ["أي سطر يبدأ من عمق مختلف عمّا قصدت؟ قارن كل سطر بالسطر الذي فوقه مباشرة."],
+    },
+    syntax: {
+      en: ["What was Python expecting to see that isn't there? Read the line the editor marks, and the line above it."],
+      ar: ["ما الذي كان بايثون يتوقع أن يراه ولم يجده؟ اقرأ السطر الذي يشير إليه المحرر والسطر الذي فوقه."],
+    },
+    name: {
+      en: ["Which name does Python say it doesn't know, and where did you expect it to be defined?"],
+      ar: ["أي اسم يقول بايثون إنه لا يعرفه، وأين توقعت أن يكون معرّفاً؟"],
+    },
+    other: {
+      en: ["In your own words, what is that message telling you, and which part of your code could cause it?"],
+      ar: ["بكلماتك أنت، ماذا تخبرك هذه الرسالة، وأي جزء من الكود قد يسببها؟"],
+    },
+  },
+} satisfies Record<string, Pool | Record<LoadErrorKind, Pool>>;
+
+function loadErrorKind(type: string): LoadErrorKind {
+  if (/^(IndentationError|TabError)$/.test(type)) return "indent";
+  if (/^SyntaxError$/.test(type)) return "syntax";
+  if (/^(NameError|UnboundLocalError)$/.test(type)) return "name";
+  return "other";
+}
+
+function loadErrorVars(error: LoadError, lang: Lang, ctx: ScriptedContext): Vars {
+  const atline = error.line ? (lang === "ar" ? ` في السطر ${error.line}` : ` on line ${error.line}`) : "";
+  return { file: ctx.ticket.fileName, etype: error.type, line: error.line ?? "", atline };
+}
+
+/** "Python stops on line 7 with this error: IndentationError. The message says ... Should line 7 ...?" */
+function loadErrorText(error: LoadError, lang: Lang, seed: string, vars: Vars): string {
+  const kind = loadErrorKind(error.type);
+  const parts = [say(LOAD_ERROR_LINES.lead, lang, seed, vars)];
+  // Python's own message, on one line and short; it is about the student's code, never a fix.
+  const emsg = truncate(error.message.replace(/\s+/g, " ").trim(), 120);
+  if (emsg) parts.push(say(LOAD_ERROR_LINES.message, lang, seed, { ...vars, emsg }));
+  parts.push(say((error.line ? LOAD_ERROR_LINES.question : LOAD_ERROR_LINES.questionNoLine)[kind], lang, seed, vars));
+  return parts.join(" ");
+}
+
 function stakeholderNames(ctx: ScriptedContext): string[] {
   return [ctx.archetype.stakeholder.name.en, ctx.archetype.stakeholder.name.ar];
 }
@@ -514,6 +669,14 @@ function mentorChat(req: AgentRequest, ctx: ScriptedContext): AgentResponse {
   const allGreen = isApproved(req.testSummary);
   const hidden = failingHiddenRuleFns(ctx.ticket, req.testSummary, stakeholderNames(ctx));
   const pointer = hidden.length ? ` ${say(MENTOR_LINES.hiddenPointer, lang, seed, { ...vars, hfn: hidden[0] })}` : "";
+
+  // The file doesn't load, so there are no failing tests to talk about: talk about the error instead.
+  const loadError = req.testSummary?.error;
+  if (loadError && msg.trim() && !isGreeting(msg) && !isThanks(msg)) {
+    const errVars = { ...vars, ...loadErrorVars(loadError, lang, ctx) };
+    const refuse = asksForAnswer(msg) ? `${say(LOAD_ERROR_LINES.refuse, lang, seed, errVars)} ` : "";
+    return { text: refuse + loadErrorText(loadError, lang, seed, errVars), provider: "scripted" };
+  }
 
   if (!allGreen && asksForAnswer(msg)) return { text: say(MENTOR_LINES.refuse, lang, seed, vars) + pointer, provider: "scripted" };
   if (!msg.trim() || isGreeting(msg)) return { text: say(MENTOR_LINES.greet, lang, seed, vars), provider: "scripted" };
@@ -533,11 +696,15 @@ function mentorHint(req: AgentRequest, ctx: ScriptedContext): AgentResponse {
   const seed = `${fn}:${req.hintLevel ?? 0}:${req.message ?? ""}`;
   const vars: Vars = { ...baseVars(req, ctx), fn };
   const found = hintFor(ctx.ticket, fn, req.hintLevel);
-  if (!found) return { text: say(MENTOR_LINES.noHint, lang, seed, vars), provider: "scripted" };
+  // A file that doesn't load comes first: no test can run until it does.
+  const loadError = req.testSummary?.error;
+  const note = loadError ? say(LOAD_ERROR_LINES.hintNote, lang, seed, { ...vars, ...loadErrorVars(loadError, lang, ctx) }) : "";
+  if (!found) return { text: [note, say(MENTOR_LINES.noHint, lang, seed, vars)].filter(Boolean).join(" "), provider: "scripted" };
 
   const hintText = (found.hint.text[lang] || found.hint.text.en).trim();
   const intro = found.exhausted ? MENTOR_LINES.hintExhausted : MENTOR_LINES.hintIntro[Math.min(found.index, 2)];
   const parts = [say(intro, lang, seed, vars), hintText, say(MENTOR_LINES.hintOutro, lang, seed, vars)];
+  if (note) parts.unshift(note);
 
   const hidden = failingHiddenRuleFns(ctx.ticket, req.testSummary, stakeholderNames(ctx));
   const hintMentionsStakeholder = stakeholderNames(ctx).some((n) => normalizeForMatch(hintText).includes(normalizeForMatch(n)));
@@ -627,6 +794,10 @@ const REVIEW = {
     en: "Changes requested: I don't see any test results yet. Run the tests, then send it back to me.",
     ar: "مطلوب تعديلات: لا أرى أي نتائج اختبارات بعد. شغّل الاختبارات ثم أرسله لي مرة أخرى.",
   },
+  loadError: {
+    en: "Changes requested: {file} doesn't load yet, so no test could run. Fix the {etype}, run the tests, then send it back to me.",
+    ar: "مطلوب تعديلات: الملف {file} لا يُحمَّل بعد، لذلك لم يعمل أي اختبار. أصلح خطأ {etype}، وشغّل الاختبارات، ثم أرسله لي مرة أخرى.",
+  },
 };
 
 function praiseKey(code: string): keyof typeof REVIEW.praise | null {
@@ -668,10 +839,14 @@ function mentorReview(req: AgentRequest, ctx: ScriptedContext): AgentResponse {
   const vars: Vars = { ...baseVars(req, ctx), passed: ts?.passed ?? 0, total: ts?.total ?? 0, fn: okFn };
   const t = (l: { en: string; ar: string }, extra: Vars = {}) => fill(l[lang], { ...vars, ...extra });
 
-  const key = praiseKey(code) ?? (ts && ts.passed > 0 && !approved ? "progress" : "fallback");
+  const loadError = ts?.error;
+  const key = praiseKey(code) ?? (ts && ts.passed > 0 && !approved && !loadError ? "progress" : "fallback");
   const praise = t(REVIEW.praise[key]);
 
   const suggestions: string[] = [];
+  // A file that doesn't load comes first: nothing else can be checked until it does.
+  const errVars = loadError ? loadErrorVars(loadError, lang, ctx) : {};
+  if (loadError) suggestions.push(loadErrorText(loadError, lang, `review:${loadError.type}`, { ...vars, ...errVars }));
   if (failing.length) {
     const first = failing[0];
     suggestions.push(t(failing.length === 1 ? REVIEW.failingOne : REVIEW.failingMany, { test: first.name, fn: first.fn, count: failing.length }));
@@ -697,7 +872,13 @@ function mentorReview(req: AgentRequest, ctx: ScriptedContext): AgentResponse {
   if (!suggestions.length) suggestions.push(t(REVIEW.reflect));
 
   const picked = suggestions.slice(0, 3).map((s, i) => `${i + 1}. ${s}`);
-  const decision = approved ? t(REVIEW.approved) : ts && ts.total > 0 ? t(REVIEW.changes) : t(REVIEW.noTests);
+  const decision = approved
+    ? t(REVIEW.approved)
+    : loadError
+      ? t(REVIEW.loadError, errVars)
+      : ts && ts.total > 0
+        ? t(REVIEW.changes)
+        : t(REVIEW.noTests);
   return { text: [praise, ...picked, decision].join("\n"), provider: "scripted", approved };
 }
 
@@ -734,16 +915,16 @@ const MANAGER_LINES = {
     ],
     ar: [
       "اجتماع سريع: على ماذا تعمل، وهل هناك ما يعيقك؟ إن بدت المهمة غامضة فهذا طبيعي هنا؛ اسأل {stakeholder} عمّا ينقصها.",
-      "تركيزك اليوم على {key}. اجعل الاختبارات كلها ناجحة، ثم سنشغّل الكود على مجموعة البيانات الكاملة لـ{area}.",
+      "تركيزك اليوم على {key}. اجعل الاختبارات كلها ناجحة، ثم سنشغّل الكود على مجموعة البيانات الكاملة من {area}.",
       "في شركة ناشئة بهذا الحجم يتحدث الجميع مع العملاء. لا تتردد في مراسلة {stakeholder}، واسأل رافي عندما يصعب عليك الكود.",
     ],
   },
   demoLead: {
     en: ["I just watched your code run on the full dataset for {area}.", "Your code just ran on the full {area} dataset."],
-    ar: ["شاهدت للتو الكود الخاص بك يعمل على مجموعة البيانات الكاملة لـ{area}.", "الكود الخاص بك عمل للتو على مجموعة البيانات الكاملة لـ{area}."],
+    ar: ["شاهدت للتو الكود الخاص بك يعمل على مجموعة البيانات الكاملة من {area}.", "الكود الخاص بك عمل للتو على مجموعة البيانات الكاملة من {area}."],
   },
   demoNoSummary: { en: ["It ran from start to finish."], ar: ["وقد عمل من البداية إلى النهاية."] },
-  demoWhy: { en: ["This matters to {stakeholder} because {why}."], ar: ["هذا مهم لـ{stakeholder} لأن {why}."] },
+  demoWhy: { en: ["This matters to {stakeholder} because {why}."], ar: ["هذا مهم بالنسبة إلى {stakeholder} لأن {why}."] },
   demoClose: {
     en: ["Nice work{cn}.", "That's what shipping real work feels like{cn}."],
     ar: ["عمل رائع{cn}.", "هكذا يبدو إنجاز عمل حقيقي{cn}."],

@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import { askAgent } from "@/lib/agentClient";
 import type { AgentId, AgentRequest } from "@/lib/types";
-import { testSummary, useDay } from "@/lib/useDay";
+import { isGreenNow, testSummary, useDay } from "@/lib/useDay";
 import { useUi, useWorld } from "@/lib/world/store";
 
 /** Sends messages to the AI coworkers and writes their replies into the world state. */
@@ -61,6 +61,9 @@ export function useAgents() {
       const b = base();
       if (!b) return;
       const w = useWorld.getState();
+      // Every test already passes on this exact code: never spend (or count) a hint. The chip is hidden
+      // then too; this covers a tap that lands just as a green run finishes.
+      if (isGreenNow(w)) return;
       const level = w.useHint(fn);
       const q = b.lang === "ar" ? `هل يمكنك مساعدتي في ${fn}؟` : `Can you help me with ${fn}?`;
       const past = history("mentor");

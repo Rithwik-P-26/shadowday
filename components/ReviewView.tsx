@@ -80,14 +80,16 @@ export function ReviewView() {
               {diff.map((d, i) =>
                 d.kind === "gap" ? (
                   <div key={i} className="bg-white/[0.03] px-4 text-muted">
-                    ⋯ {count("unchangedLines", d.count)}
+                    {/* The diff box is always left-to-right; isolate the label so Arabic keeps "4 أسطر دون تغيير" in its own order. */}
+                    ⋯ <span dir={lang === "ar" ? "rtl" : "ltr"}>{count("unchangedLines", d.count)}</span>
                   </div>
                 ) : (
                   <div
                     key={i}
                     className={`flex whitespace-pre ${d.kind === "add" ? "bg-good/10 text-ink" : d.kind === "del" ? "bg-bad/10 text-ink/60 line-through decoration-bad/40" : "text-ink/60"}`}
                   >
-                    <span className="w-12 shrink-0 select-none pe-3 text-end text-muted/60">{d.kind !== "del" ? d.n : ""}</span>
+                    {/* Full muted grey: about 5.7:1 even on the green "added" rows (muted/60 was under 3:1). */}
+                    <span className="w-12 shrink-0 select-none pe-3 text-end text-muted">{d.kind !== "del" ? d.n : ""}</span>
                     <span className={`w-4 shrink-0 select-none ${d.kind === "add" ? "text-good" : d.kind === "del" ? "text-bad" : ""}`}>
                       {d.kind === "add" ? "+" : d.kind === "del" ? "−" : " "}
                     </span>
@@ -141,7 +143,7 @@ export function ReviewView() {
               </>
             ) : (
               <>
-                <RichText text={review!.text} className="mt-4 text-[15px] leading-relaxed text-ink/90" />
+                <RichText text={review!.text} dir="auto" className="mt-4 text-[15px] leading-relaxed text-ink/90" />
                 <p
                   className={`mt-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm ${
                     review!.approved ? "bg-good/15 text-good" : "bg-warn/15 text-warn"

@@ -300,7 +300,7 @@ export function DemoView() {
             <Avatar person={people.manager} size={36} />
             <div className="rounded-[18px] rounded-ss-[6px] bg-raised-2 px-4 py-3 text-[15px] leading-relaxed">
               {demoNote ? (
-                <RichText text={demoNote} />
+                <RichText text={demoNote} dir="auto" />
               ) : noteFailed ? (
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="inline-flex items-start gap-2">

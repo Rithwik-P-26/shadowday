@@ -2,6 +2,7 @@
 
 import { python } from "@codemirror/lang-python";
 import { indentUnit } from "@codemirror/language";
+import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { indentMore, indentLess } from "@codemirror/commands";
 import CodeMirror, { type ReactCodeMirrorRef } from "@uiw/react-codemirror";
@@ -55,10 +56,14 @@ export function CodeEditor({
       baseTheme,
       EditorView.lineWrapping,
       EditorView.contentAttributes.of({ "aria-label": label, autocapitalize: "off", autocorrect: "off", spellcheck: "false" }),
-      keymap.of([
-        { key: "Mod-Enter", run: () => (onRun?.(), true) },
-        { key: "Tab", run: indentMore, shift: indentLess },
-      ]),
+      // basicSetup's defaultKeymap is added before these extensions and binds Mod-Enter to insertBlankLine,
+      // so give ours the highest precedence or Cmd/Ctrl+Enter would add a line instead of running the tests.
+      Prec.highest(
+        keymap.of([
+          { key: "Mod-Enter", run: () => (onRun?.(), true) },
+          { key: "Tab", run: indentMore, shift: indentLess },
+        ]),
+      ),
     ],
     [onRun, label],
   );

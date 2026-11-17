@@ -176,7 +176,7 @@ The data in \`${ticket.data.fileName}\` is realistic but made up for this exerci
               <Avatar person={people.manager} size={36} />
               <h2 className="font-medium">{t("managerNote")}</h2>
             </div>
-            <RichText text={w.eod ?? ""} className="mt-4 max-w-3xl text-[16px] leading-relaxed text-ink/90" />
+            <RichText text={w.eod ?? ""} dir="auto" className="mt-4 max-w-3xl text-[16px] leading-relaxed text-ink/90" />
           </section>
 
           <section className="print-card min-w-0 rounded-[24px] border border-line bg-surface p-5 lg:col-span-2 lg:p-6">

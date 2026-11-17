@@ -5,7 +5,7 @@ import { useId, useState } from "react";
 import { Avatar, onTabListKeyDown, RichText } from "@/components/ui";
 import { DATA_NOTES } from "@/content/tickets/generated";
 import { useT } from "@/lib/i18n";
-import { useDay } from "@/lib/useDay";
+import { functionStatus, isRunFresh, useDay } from "@/lib/useDay";
 import { useWorld } from "@/lib/world/store";
 
 const VIEWS = ["ticket", "data"] as const;
@@ -13,18 +13,18 @@ const VIEWS = ["ticket", "data"] as const;
 export function TicketPanel() {
   const day = useDay();
   const { t, l } = useT();
+  // functionStatus reads the store directly: these subscriptions re-render the ticks when a run lands
+  // and when an edit makes that run stale (and again if the edit is undone).
   const lastRun = useWorld((s) => s.lastRun);
+  const fresh = useWorld(isRunFresh);
   const [view, setView] = useState<"ticket" | "data">("ticket");
   const uid = useId();
   if (!day) return null;
   const { ticket, people } = day;
   const dataNote = DATA_NOTES[ticket.id];
-
-  const status = (fn: string) => {
-    const rs = lastRun?.ok ? lastRun.results.filter((r) => r.fn === fn) : [];
-    if (!rs.length) return "unknown";
-    return rs.every((r) => r.passed) ? "pass" : "fail";
-  };
+  const statuses = functionStatus(ticket.functions.map((f) => f.name));
+  // An "unknown" after a run means the code changed since then, not that it never ran.
+  const unknownLabel = lastRun && !fresh ? t("fnStale") : t("fnNotRun");
 
   const rows = ticket.data.csv.trim().split("\n");
   const header = rows[0].split(",");
@@ -76,7 +76,7 @@ export function TicketPanel() {
             <h3 className="mb-2 text-sm font-medium text-muted">{t("functions")}</h3>
             <ul className="space-y-2">
               {ticket.functions.map((f) => {
-                const s = status(f.name);
+                const s = statuses[f.name];
                 return (
                   <li key={f.name} className="rounded-[14px] border border-line bg-raised p-3">
                     <p className="code-ltr flex items-start gap-2 font-mono text-[13px]">
@@ -85,7 +85,7 @@ export function TicketPanel() {
                       ) : s === "fail" ? (
                         <CircleX size={15} className="mt-0.5 shrink-0 text-bad" role="img" aria-label={t("fnFailing")} />
                       ) : (
-                        <Circle size={15} className="mt-0.5 shrink-0 text-muted" role="img" aria-label={t("fnNotRun")} />
+                        <Circle size={15} className="mt-0.5 shrink-0 text-muted" role="img" aria-label={unknownLabel} />
                       )}
                       <span className="min-w-0 [overflow-wrap:anywhere]">{f.signature}</span>
                     </p>

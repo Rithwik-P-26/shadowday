@@ -1,35 +1,63 @@
 "use client";
 
-import { CircleAlert, CircleCheck, CircleX, Loader2 } from "lucide-react";
+import { CircleAlert, CircleCheck, CircleX, History, Loader2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import { useDay } from "@/lib/useDay";
+import { isRunFresh, useDay } from "@/lib/useDay";
 import { useUi, useWorld } from "@/lib/world/store";
+
+/**
+ * One state of the test summary, also used for "Setting up Python" in the action bar. It sits in a `truncate`
+ * button, but an ellipsis cannot cut into an inline-flex child, so a long label was just chopped (in Arabic at
+ * 360px "3 من 12 ناجحة" read as "3 من 2"). Phones show the short form (or only the icon); the colour and icon keep
+ * the meaning, and screen readers still get the full label. Wider screens show the full label, which ends in an
+ * ellipsis if the bar is still too narrow (the desktop editor pane just above 1024px).
+ */
+export function SummaryLabel({ icon, short, full, tone }: { icon: React.ReactNode; short: React.ReactNode; full: string; tone: string }) {
+  return (
+    <span className={`inline-flex max-w-full items-center gap-1.5 text-sm ${tone}`}>
+      {icon}
+      {short != null && (
+        <span className="truncate sm:hidden" aria-hidden>
+          {short}
+        </span>
+      )}
+      <span className="truncate max-sm:sr-only">{full}</span>
+    </span>
+  );
+}
 
 export function TestSummaryPill() {
   const { t } = useT();
   const run = useWorld((s) => s.lastRun);
+  // Subscribes to code and lastRunCode, so the pill turns muted on the first edit after a run (and back on undo).
+  const fresh = useWorld(isRunFresh);
   const running = useUi((s) => s.running);
+  // The Run button next to it already says "Running…", so phones only show the spinner.
   if (running)
-    return (
-      <span className="inline-flex items-center gap-1.5 text-sm text-muted">
-        <Loader2 size={15} className="animate-spin" aria-hidden /> {t("running")}
-      </span>
-    );
+    return <SummaryLabel icon={<Loader2 size={15} className="shrink-0 animate-spin" aria-hidden />} short={null} full={t("running")} tone="text-muted" />;
   if (!run) return null;
-  if (!run.ok)
-    return (
-      <span className="inline-flex items-center gap-1.5 text-sm text-bad">
-        <CircleAlert size={15} aria-hidden /> {t("codeError")}
-      </span>
-    );
   const passed = run.results.filter((r) => r.passed).length;
   const total = run.results.length;
+  // The code changed after this run: show its result as history, never as a green light.
+  if (!fresh)
+    return (
+      <SummaryLabel
+        icon={<History size={15} aria-hidden className="shrink-0" />}
+        short={run.ok ? `${passed}/${total}` : t("errorShort")}
+        full={run.ok ? t("lastRunStale", { passed, total }) : t("lastRunStaleError")}
+        tone="text-muted"
+      />
+    );
+  if (!run.ok)
+    return <SummaryLabel icon={<CircleAlert size={15} aria-hidden className="shrink-0" />} short={t("errorShort")} full={t("codeError")} tone="text-bad" />;
   const all = passed === total && total > 0;
   return (
-    <span className={`inline-flex items-center gap-1.5 text-sm ${all ? "text-good" : "text-warn"}`}>
-      {all ? <CircleCheck size={15} aria-hidden /> : <CircleX size={15} aria-hidden />}
-      {all ? t("allPassing") : t("passedOf", { passed, total })}
-    </span>
+    <SummaryLabel
+      icon={all ? <CircleCheck size={15} aria-hidden className="shrink-0" /> : <CircleX size={15} aria-hidden className="shrink-0" />}
+      short={`${passed}/${total}`}
+      full={all ? t("allPassing") : t("passedOf", { passed, total })}
+      tone={all ? "text-good" : "text-warn"}
+    />
   );
 }
 

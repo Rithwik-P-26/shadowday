@@ -215,7 +215,7 @@ async function main() {
       const stop = await startRec(page, "07-demo");
       await page.getByRole("button", { name: /Merge and demo it/ }).click();
       await sleep(700);
-      await page.getByRole("button", { name: /Run it on the real data/ }).click();
+      await page.getByRole("button", { name: /Run it on the full dataset/ }).click();
       await page.locator("svg[role=img]").first().waitFor({ timeout: 60000 });
       await page.getByRole("button", { name: /Wrap up the day/ }).waitFor({ timeout: 60000 });
       await sleep(2500);

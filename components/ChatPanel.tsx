@@ -6,6 +6,7 @@ import { Avatar, onTabListKeyDown, RichText, TypingDots } from "@/components/ui"
 import { useT } from "@/lib/i18n";
 import type { AgentId } from "@/lib/types";
 import { useAgents } from "@/lib/useAgents";
+import { isGreenNow } from "@/lib/useDay";
 import { useUi, useWorld } from "@/lib/world/store";
 
 const ORDER: AgentId[] = ["stakeholder", "mentor", "manager"];
@@ -22,6 +23,8 @@ export function ChatPanel() {
   const markRead = useWorld((s) => s.markRead);
   const revealed = useWorld((s) => s.revealed);
   const lastRun = useWorld((s) => s.lastRun);
+  // Also re-renders when an edit makes a green run stale, so the hint chip comes back.
+  const greenNow = useWorld(isGreenNow);
   const [draft, setDraft] = useState("");
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -59,7 +62,15 @@ export function ChatPanel() {
   const person = day.people[channel];
 
   const failingFn = lastRun?.ok ? lastRun.results.find((r) => !r.passed)?.fn : undefined;
-  const hintTargets = failingFn ? [failingFn] : lastRun?.ok === false ? [] : day.ticket.functions.slice(0, 1).map((f) => f.name);
+  // No hint chip while every test passes on the code in the editor now: there is nothing to unblock,
+  // and tapping it would only spend a hint on the Shadow Report.
+  const hintTargets = greenNow
+    ? []
+    : failingFn
+      ? [failingFn]
+      : lastRun?.ok === false
+        ? []
+        : day.ticket.functions.slice(0, 1).map((f) => f.name);
 
   const submit = () => {
     const text = draft.trim();

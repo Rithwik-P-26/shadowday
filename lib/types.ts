@@ -141,6 +141,8 @@ export interface AgentRequest {
     passed: number;
     total: number;
     failing: { name: string; fn: string; message: string }[];
+    /** The student's file didn't load (e.g. IndentationError), so no test could run. message is at most 300 chars. */
+    error?: { type: string; message: string; line?: number };
   };
   /** hint mode: the function the student is stuck on */
   focusFn?: string;

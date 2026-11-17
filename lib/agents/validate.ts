@@ -1,6 +1,6 @@
 import type { AgentRequest, ChatFrom } from "@/lib/types";
 import { AREAS } from "@/content/regions";
-import { AGENT_IDS, LANGS, MODES } from "@/lib/agents/util";
+import { AGENT_IDS, LANGS, MAX_LOAD_ERROR_CHARS, MODES } from "@/lib/agents/util";
 
 // Hand-written validation for POST /api/agent. Shape and enum checks only; sizes are capped later in runAgent.
 
@@ -70,6 +70,21 @@ export function parseAgentRequest(body: unknown): ParseResult {
       failing.push({ name: f.name, fn: f.fn, message: typeof f.message === "string" ? f.message : "" });
     }
     req.testSummary = { passed: ts.passed, total: ts.total, failing };
+
+    // The student's file didn't load (SyntaxError, IndentationError...), so there are no results to show.
+    if (ts.error !== undefined && ts.error !== null) {
+      const e = ts.error;
+      if (!isObj(e) || typeof e.type !== "string" || typeof e.message !== "string") return fail("testSummary.error needs type and message strings");
+      const error: NonNullable<NonNullable<AgentRequest["testSummary"]>["error"]> = {
+        type: e.type.slice(0, 80),
+        message: e.message.slice(0, MAX_LOAD_ERROR_CHARS),
+      };
+      if (e.line !== undefined && e.line !== null) {
+        if (!isNum(e.line) || !Number.isInteger(e.line) || e.line < 1) return fail("testSummary.error.line must be a positive integer");
+        error.line = e.line;
+      }
+      req.testSummary.error = error;
+    }
   }
 
   if (body.stats !== undefined && body.stats !== null) {

@@ -6,7 +6,16 @@ import type { LlmMessage } from "@/lib/llm/providers";
 import { emergencyReply, scriptedReply, type ScriptedContext } from "@/lib/llm/scripted";
 import { buildSystemPrompt, NO_CODE_RETRY_LINE } from "@/lib/agents/prompts";
 import { detectReveal, hasMarker, publicContext, stripMarker, violatesNoCode } from "@/lib/agents/guardrails";
-import { clampInt, effectiveMode, isApproved, resolveFocusFn, sanitizeName, truncate, type AgentMode } from "@/lib/agents/util";
+import {
+  clampInt,
+  effectiveMode,
+  isApproved,
+  MAX_LOAD_ERROR_CHARS,
+  resolveFocusFn,
+  sanitizeName,
+  truncate,
+  type AgentMode,
+} from "@/lib/agents/util";
 
 export const MAX_MESSAGE_CHARS = 600;
 export const MAX_HISTORY = 12;
@@ -76,6 +85,17 @@ export function sanitizeRequest(req: AgentRequest): AgentRequest {
         message: truncate(removeMarkers(String(f?.message ?? "")), 300),
       })),
     };
+    const err = req.testSummary.error;
+    if (err && typeof err === "object" && typeof err.type === "string" && typeof err.message === "string") {
+      // The type is an exception class name: keep it to identifier characters so it can't carry text into a prompt.
+      const type = truncate(err.type.replace(/[^\w.]/g, ""), 60) || "Error";
+      const error: NonNullable<NonNullable<AgentRequest["testSummary"]>["error"]> = {
+        type,
+        message: truncate(removeMarkers(err.message).replace(/\s+/g, " ").trim(), MAX_LOAD_ERROR_CHARS),
+      };
+      if (typeof err.line === "number" && Number.isFinite(err.line) && err.line >= 1) error.line = clampInt(err.line, 1, 100_000, 1);
+      out.testSummary.error = error;
+    }
   }
   if (typeof req.focusFn === "string") out.focusFn = truncate(req.focusFn, 80);
   if (req.hintLevel !== undefined) out.hintLevel = clampInt(req.hintLevel, 0, 99, 0);
